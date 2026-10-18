@@ -71,3 +71,20 @@ test("no figure's surname rule accidentally accepts a different figure's full na
 test("no suggestion when the guess already names someone in the pool", () => {
   for (const g of ["Columbus", "einstein", "Napoleon"]) assert.strictEqual(CG.suggest(g, CG.POOL), null, g);
 });
+
+test("regnal numbers and shared names stay distinct", () => {
+  assert.ok(!CG.accepts("Elizabeth II", fig("Elizabeth I")));
+  assert.ok(!CG.accepts("Elizabeth I", fig("Elizabeth II")));
+  assert.ok(CG.accepts("Queen Elizabeth", fig("Elizabeth II")));
+  assert.ok(CG.accepts("Elizabeth 2", fig("Elizabeth II")));
+  assert.ok(!CG.accepts("Martin Luther", fig("Martin Luther King Jr.")));
+  assert.ok(!CG.accepts("Martin Luther King", fig("Martin Luther")));
+  assert.ok(!CG.accepts("Augustine", fig("Augustus")));
+  assert.ok(!CG.accepts("Saint Peter", fig("Peter the Great")));
+  assert.ok(!CG.accepts("Muhammad", fig("Muhammad Ali")));
+  assert.ok(CG.accepts("Jesus", fig("Jesus of Nazareth")));
+  assert.ok(CG.accepts("Jesus Christ", fig("Jesus of Nazareth")));
+  assert.ok(CG.accepts("teddy roosevelt", fig("Theodore Roosevelt")));
+  assert.ok(CG.accepts("2pac", fig("Tupac Shakur")));
+  assert.ok(CG.accepts("Malcolm X", fig("Malcolm X")));
+});

@@ -13,9 +13,12 @@
       .replace(/[ʻ'’`.,]/g, "").replace(/[-_/]/g, " ").replace(/\s+/g, " ").trim();
   }
 
+  // Only leading titles go: "King Henry" is Henry, but "Martin Luther King" keeps its King.
   function stripTitles(s) {
-    const kept = s.split(" ").filter(w => !TITLES.has(w));
-    return kept.length ? kept.join(" ") : s;
+    const words = s.split(" ");
+    let i = 0;
+    while (i < words.length - 1 && TITLES.has(words[i])) i++;
+    return words.slice(i).join(" ");
   }
 
   // A rough sound-alike key, so transliteration variants collapse together:
@@ -61,14 +64,33 @@
   // guess as typed, without titles, with words reordered, and by sound.
   function closeness(g, form) {
     const gt = stripTitles(g), ft = stripTitles(form);
+    // A spelling with a regnal number ("peter i") only matches guesses with that same number.
+    if (numeral(ft) !== null && numeral(ft) !== numeral(gt)) return Infinity;
     if (g === form || gt === ft || sortTokens(gt) === sortTokens(ft)) return 0;
     if (skeleton(gt) === skeleton(ft)) return 0;
     return Math.min(dist(g, form), dist(gt, ft), dist(skeleton(gt), skeleton(ft)));
   }
 
+  // Regnal numbers ("Elizabeth II", "Henry 8") as numbers, so a typo allowance
+  // can never turn one monarch into another.
+  const ROMAN = { i: 1, v: 5, x: 10, l: 50, c: 100 };
+  function numeral(s) {
+    for (const w of s.split(" ").slice(1)) {
+      if (/^\d+$/.test(w)) return +w;
+      if (/^[ivxlc]+$/.test(w)) {
+        let n = 0;
+        for (let i = 0; i < w.length; i++) { const v = ROMAN[w[i]], next = ROMAN[w[i + 1]] || 0; n += v < next ? -v : v; }
+        return n;
+      }
+    }
+    return null;
+  }
+
   function accepts(guess, fig) {
     const g = norm(guess);
     if (!g) return false;
+    const gn = numeral(g), fn = numeral(norm(fig[0]));
+    if (gn !== null && fn !== null && gn !== fn) return false;
     return forms(fig).some(f => {
       const d = closeness(g, f);
       return d === 0 || d <= slack(stripTitles(f).length);

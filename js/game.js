@@ -50,7 +50,7 @@
     $("yD").textContent = yr(f[3]);
     const km = CG.lifeDistance(f);
     $("span").textContent = `Lived about ${age(f)} years · ` +
-      (km < 30 ? "died where they were born" : `${fmt(km)} km from cradle to grave`);
+      (km < 2 ? "died where they were born" : km < 30 ? `born and died ${fmt(km)} km apart` : `${fmt(km)} km from cradle to grave`);
     $("play").hidden = false; $("answer").hidden = true;
     $("guess").value = "";
     map.show(f);

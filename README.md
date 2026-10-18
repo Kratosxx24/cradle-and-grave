@@ -33,7 +33,7 @@ To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson
 |------|---------------|
 | `index.html` | Page markup |
 | `css/style.css` | All styles, with light and dark themes as color tokens at the top |
-| `js/figures.js` | The pool of 105 figures and the extra spellings each one accepts |
+| `js/figures.js` | The pool of 150 figures and the extra spellings each one accepts |
 | `js/match.js` | Name matching and "did you mean" suggestions |
 | `js/map.js` | The D3 world map, pins and zoom |
 | `js/game.js` | Rounds, hints, scoring, final screen |
