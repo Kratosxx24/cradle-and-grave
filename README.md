@@ -39,6 +39,8 @@ To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson
 | `js/game.js` | Rounds, hints, scoring, final screen |
 | `data/portraits.js` | Portrait image and Wikipedia link for each figure (generated) |
 | `scripts/fetch-portraits.js` | Regenerates `data/portraits.js` from Wikipedia (`npm run portraits`) |
+| `icons/` | Favicon and home-screen icons. `favicon.svg` and `icon-full.svg` are the sources; the PNGs are rendered from them |
+| `manifest.webmanifest` | App name and icons for Add to Home Screen |
 | `data/atlas.js` | Country outlines (Natural Earth 1:50m via [world-atlas](https://github.com/topojson/world-atlas)) |
 | `tests/` | Node tests for `match.js` and the data |
 
