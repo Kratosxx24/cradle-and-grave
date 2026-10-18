@@ -2,7 +2,7 @@
 
 A guess-who game on a map. The map shows where a famous historical figure was born and where they died, with the year of each. You type in who it is, and the answer comes with their portrait.
 
-**Play online:** https://kratosxx24.github.io/lifelines/
+**Play online:** https://lifelines.codexcanon.workers.dev (Cloudflare) or https://kratosxx24.github.io/lifelines/ (GitHub Pages)
 
 ## How it plays
 
@@ -27,6 +27,16 @@ The tests cover name matching and check the figure data. They need Node 18 or ne
 
 To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson")` in the browser console.
 
+## Deploy
+
+```bash
+npm run deploy
+```
+
+This publishes to Cloudflare Workers as a static-assets-only Worker (`wrangler.jsonc`). There is no build: the repo root goes up as it is, minus everything listed in `.assetsignore` (tests, scripts, README, repo config). It needs `wrangler login` once on each machine.
+
+A `post-commit` hook in `.git/hooks` runs the deploy after every commit to `main`. Git doesn’t carry hooks over in a clone, so a fresh clone installs it with `cp scripts/post-commit .git/hooks/`. `NO_DEPLOY=1 git commit …` skips one deploy.
+
 ## Project layout
 
 | Path | What it holds |
@@ -39,9 +49,11 @@ To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson
 | `js/game.js` | Rounds, hints, scoring, final screen |
 | `data/portraits.js` | Portrait image and Wikipedia link for each figure (generated) |
 | `scripts/serve.js` | The local static server (`npm start`) |
+| `scripts/post-commit` | The deploy-on-commit hook, to copy into `.git/hooks/` |
 | `scripts/fetch-portraits.js` | Regenerates `data/portraits.js` from Wikipedia (`npm run portraits`) |
 | `icons/` | Favicon and home-screen icons. `favicon.svg` and `icon-full.svg` are the sources; the PNGs are rendered from them |
 | `manifest.webmanifest` | App name and icons for Add to Home Screen |
+| `wrangler.jsonc`, `.assetsignore` | Cloudflare deploy config, and what stays off the live site |
 | `data/atlas.js` | Country outlines (Natural Earth 1:50m via [world-atlas](https://github.com/topojson/world-atlas)) |
 | `tests/` | Node tests for `match.js` and the data |
 

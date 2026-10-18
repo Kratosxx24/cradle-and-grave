@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4.114.0/config-schema.json",
+  "name": "lifelines",
+  "compatibility_date": "2026-07-14",
+
+  // Assets only, no Worker script: the game is static files with no build
+  // step, so Cloudflare serves the repo root as it stands. .assetsignore keeps
+  // the tests, scripts and repo plumbing out of what gets published.
+  "assets": {
+    "directory": "."
+  }
+}

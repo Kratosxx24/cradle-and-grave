@@ -1,0 +1,28 @@
+#!/bin/sh
+# Deploy to Cloudflare on every commit to main.
+#
+# `npm run deploy` is `wrangler deploy`, which uploads the repo root as static
+# assets (minus what .assetsignore lists). There's no build, so a commit always
+# deploys exactly what's in the tree.
+#
+# Skip a deploy for one commit:   NO_DEPLOY=1 git commit -m "…"
+# Turn it off entirely:           rm .git/hooks/post-commit
+
+[ -n "$NO_DEPLOY" ] && exit 0
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" != "main" ]; then
+  echo "post-commit: on '$branch', not main — skipping deploy."
+  exit 0
+fi
+
+echo "post-commit: deploying to Cloudflare…"
+if npm run deploy; then
+  echo "post-commit: deployed."
+else
+  echo "post-commit: DEPLOY FAILED — the commit is saved, the live site is unchanged."
+  echo "post-commit: fix it and re-run: npm run deploy"
+fi
+
+# Never fail the commit itself: it has already happened by the time this runs.
+exit 0

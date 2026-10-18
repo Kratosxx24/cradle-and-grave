@@ -1,0 +1,13 @@
+# Published as-is from the repo root; everything here stays off the live site.
+.git
+.gitignore
+.assetsignore
+.claude
+.wrangler
+node_modules
+scripts
+tests
+package.json
+package-lock.json
+README.md
+wrangler.jsonc
