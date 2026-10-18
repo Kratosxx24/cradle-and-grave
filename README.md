@@ -25,6 +25,8 @@ npm test
 
 The tests cover name matching and check the figure data. They need Node 18 or newer and no installs.
 
+To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson")` in the browser console.
+
 ## Project layout
 
 | Path | What it holds |

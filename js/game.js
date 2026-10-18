@@ -187,5 +187,14 @@
     if (!$("final").hidden) newGame(); else if (done) $("next").click();
   });
 
+  // Console helper for testing: CG.dev.play("Thomas Jefferson") swaps the current figure.
+  CG.dev = {
+    play(name) {
+      const i = CG.POOL.findIndex(f => f[0] === name);
+      if (i < 0) return `No figure named ${name}`;
+      $("final").hidden = true; picks[round] = i; startRound();
+    },
+  };
+
   newGame();
 })(window.CG = window.CG || {});

@@ -59,8 +59,19 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 .coast { fill: none; stroke: var(--border); stroke-width: .9; vector-effect: non-scaling-stroke; }
 .life { fill: none; stroke: var(--life); stroke-width: 2; stroke-dasharray: 2 5; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .7; }
 .pin text { pointer-events: none; }
-.pin circle { stroke: var(--panel); stroke-width: 2.5; }
-.pin.b circle { fill: var(--born); } .pin.d circle { fill: var(--died); }
+.pin .dot { stroke: var(--panel); stroke-width: 2.5; }
+.pin.b .dot { fill: var(--born); } .pin.d .dot { fill: var(--died); }
+.pin .halo { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: halo 1.6s ease-out 2; opacity: 0; }
+.pin.b .halo { stroke: var(--born); } .pin.d .halo { stroke: var(--died); }
+@keyframes halo { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(3.2); opacity: 0; } }
+.countries text {
+  font-family: var(--body); font-weight: 500; text-transform: uppercase; letter-spacing: .12em; text-anchor: middle;
+  dominant-baseline: central; fill: var(--muted); opacity: .75; pointer-events: none;
+  paint-order: stroke; stroke: var(--land); stroke-width: 3px; stroke-linejoin: round;
+}
+.scalebar .bg { fill: var(--panel); stroke: var(--line); }
+.scalebar path { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.scalebar text { font-family: var(--mono); font-size: 10px; fill: var(--ink); text-anchor: middle; }
 .pin .glyph { font-family: var(--mono); font-size: 10px; font-weight: 600; text-anchor: middle; dominant-baseline: central; fill: var(--panel); }
 .pin .tag { font-family: var(--mono); font-size: 13px; font-weight: 600; dominant-baseline: central; paint-order: stroke; stroke: var(--land-hi); stroke-width: 4px; stroke-linejoin: round; }
 .pin.b .tag { fill: var(--born); } .pin.d .tag { fill: var(--died); }
