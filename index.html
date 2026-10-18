@@ -4,12 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lifelines</title>
+<meta name="theme-color" content="#e9eef0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1419" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-title" content="Lifelines">
 <meta name="description" content="A map traces where a famous figure's life began and ended. Name them.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 24 L25 8' stroke='%2317242b' stroke-width='2' stroke-dasharray='2 3'/%3E%3Ccircle cx='7' cy='24' r='5' fill='%230b7f72'/%3E%3Ccircle cx='25' cy='8' r='5' fill='%23b8322b'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 <div class="app">
@@ -48,7 +51,7 @@
           <button data-h="initials">Initials<span>−250</span></button>
         </div>
         <form class="ask" id="ask" autocomplete="off">
-          <input id="guess" name="guess" placeholder="Type a name, e.g. Isaac Newton" aria-label="Your guess" spellcheck="false" autocapitalize="words">
+          <input id="guess" name="guess" placeholder="Type a name" aria-label="Your guess" spellcheck="false" autocapitalize="words" autocorrect="off" enterkeyhint="go">
           <button class="go" type="submit">Guess</button>
         </form>
         <div class="suggest" id="suggest" hidden role="status">
@@ -110,11 +113,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data/atlas.js?v=6"></script>
-<script src="data/portraits.js?v=6"></script>
-<script src="js/figures.js?v=6"></script>
-<script src="js/match.js?v=6"></script>
-<script src="js/map.js?v=7"></script>
-<script src="js/game.js?v=6"></script>
+<script src="data/atlas.js?v=8"></script>
+<script src="data/portraits.js?v=8"></script>
+<script src="js/figures.js?v=8"></script>
+<script src="js/match.js?v=8"></script>
+<script src="js/map.js?v=8"></script>
+<script src="js/game.js?v=8"></script>
 </body>
 </html>

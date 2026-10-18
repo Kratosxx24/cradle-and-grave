@@ -144,6 +144,10 @@
     $("nextLabel").textContent = round + 1 < ROUNDS ? "Next figure" : "See final score";
     render();
     $("next").focus({ preventScroll: true });
+    // On phones the card sits under the map; bring the answer into view once the keyboard drops.
+    if (!window.matchMedia("(min-width: 681px)").matches) {
+      setTimeout(() => $("answer").scrollIntoView({ behavior: "smooth", block: "nearest" }), 250);
+    }
   }
 
   function showPortrait(f) {

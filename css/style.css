@@ -115,7 +115,7 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 form.ask { display: flex; gap: 8px; }
 form.ask input {
   flex: 1; min-width: 0; padding: 11px 12px; border-radius: 6px; border: 1.5px solid var(--line); background: var(--field);
-  color: var(--ink); font: 500 15px var(--body);
+  color: var(--ink); font: 500 16px var(--body);
 }
 form.ask input:focus { outline: none; border-color: var(--ink); }
 form.ask input.shake { animation: shake .35s; border-color: var(--died); }
@@ -169,6 +169,10 @@ td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   #map { flex: 1; min-height: 240px; border: 1px solid var(--line); border-radius: 6px; background: var(--ocean); }
   .card { position: static; width: 100%; max-width: none; max-height: none; margin-top: 10px; box-shadow: none; padding: 14px; gap: 12px; }
   .brand p { display: none; }
+  .hints button { padding: 8px 12px; font-size: 13px; }
+  .link { padding: 6px 0; }
+  .zoomctl button { width: 40px; height: 40px; }
+  body { padding-block: 10px max(12px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
