@@ -132,6 +132,18 @@ form.ask input.shake { animation: shake .35s; border-color: var(--died); }
 .worth { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 button:focus-visible { outline: 2px solid var(--born); outline-offset: 2px; }
 
+.reveal { display: flex; gap: 16px; align-items: flex-start; }
+.reveal-text { min-width: 0; display: flex; flex-direction: column; }
+.portrait {
+  flex: none; width: 104px; aspect-ratio: 4 / 5; margin: 0; border-radius: 3px; overflow: hidden; background: var(--line);
+  box-shadow: 0 0 0 1px var(--line), 0 0 0 5px var(--panel), 0 0 0 6px var(--border); margin: 6px;
+  animation: develop .7s ease-out both;
+}
+.portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
+@keyframes develop { from { opacity: 0; filter: sepia(1) blur(3px); } to { opacity: 1; filter: none; } }
+.wiki { margin-top: 6px; font-size: 13px; color: var(--muted); text-underline-offset: 3px; }
+.wiki:hover { color: var(--ink); }
+td .face { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; object-position: center 20%; vertical-align: middle; margin-right: 8px; background: var(--line); }
 .answer h2 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.05; margin: 4px 0; text-wrap: balance; }
 .answer .verdict { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; }
 .answer .verdict.win { color: var(--good); } .answer .verdict.lose { color: var(--died); }

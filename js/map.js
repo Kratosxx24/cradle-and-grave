@@ -153,7 +153,10 @@
 
       // Centre the pins in the space right of the card, nudged left so labels have room on the right.
       const tx = cardW + (w - cardW) / 2 - Math.min(50, w * 0.08), ty = h / 2;
-      svg.transition().duration(duration).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(k).translate(-cx, -cy));
+      const target = d3.zoomIdentity.translate(tx, ty).scale(k).translate(-cx, -cy);
+      // Hidden tabs don't run animation frames, so a transition would never finish; jump instead.
+      if (duration === 0 || document.hidden) svg.interrupt().call(zoom.transform, target);
+      else svg.transition().duration(duration).call(zoom.transform, target);
     }
 
     svg.call(zoom.transform, d3.zoomIdentity.scale(k0));

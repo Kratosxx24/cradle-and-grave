@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cradle and Grave</title>
-<meta name="description" content="A map shows where a famous historical figure was born and died. Name them.">
+<title>Lifelines</title>
+<meta name="description" content="A map traces where a famous figure's life began and ended. Name them.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 24 L25 8' stroke='%2317242b' stroke-width='2' stroke-dasharray='2 3'/%3E%3Ccircle cx='7' cy='24' r='5' fill='%230b7f72'/%3E%3Ccircle cx='25' cy='8' r='5' fill='%23b8322b'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 <div class="app">
   <header>
     <div class="brand">
-      <h1>Cradle <i>&amp;</i> Grave</h1>
-      <p>Where they were born, where they died. Name them.</p>
+      <h1>Life<i>lines</i></h1>
+      <p>Where a life began, where it ended. Who walked it?</p>
     </div>
     <div class="tally">
       <div><span>Figure</span><b id="roundNo">1 / 5</b></div>
@@ -63,9 +63,15 @@
       </div>
 
       <div class="answer" id="answer" hidden>
-        <div class="verdict" id="verdict"></div>
-        <h2 id="name"></h2>
-        <div class="desc" id="desc"></div>
+        <div class="reveal">
+          <figure class="portrait" id="portrait" hidden><img id="portraitImg" alt=""></figure>
+          <div class="reveal-text">
+            <div class="verdict" id="verdict"></div>
+            <h2 id="name"></h2>
+            <div class="desc" id="desc"></div>
+            <a class="wiki" id="wiki" target="_blank" rel="noopener">Read more on Wikipedia</a>
+          </div>
+        </div>
         <p class="note" id="approx" hidden>Historians disagree on the exact spot; this uses the most commonly cited location.</p>
         <div class="row">
           <span class="pts" id="pts"></span>
@@ -78,7 +84,7 @@
       <div class="sheet">
         <div>
           <div class="eyebrow">Final tally</div>
-          <h2>Case closed</h2>
+          <h2>Five lives, retraced</h2>
         </div>
         <div>
           <div class="big" id="finalScore">0 <small>/ 5,000</small></div>
@@ -104,10 +110,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="data/atlas.js?v=5"></script>
-<script src="js/figures.js?v=5"></script>
-<script src="js/match.js?v=5"></script>
-<script src="js/map.js?v=5"></script>
-<script src="js/game.js?v=5"></script>
+<script src="data/atlas.js?v=6"></script>
+<script src="data/portraits.js?v=6"></script>
+<script src="js/figures.js?v=6"></script>
+<script src="js/match.js?v=6"></script>
+<script src="js/map.js?v=7"></script>
+<script src="js/game.js?v=6"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // Game flow: rounds, hints, guesses, scoring and the final tally.
 (function (CG) {
   const ROUNDS = 5, BASE = 1000, HINT_COST = 250, MISS_COST = 100, FLOOR = 100;
-  const SITE = "kratosxx24.github.io/cradle-and-grave";
+  const SITE = "kratosxx24.github.io/lifelines";
   const $ = id => document.getElementById(id);
 
   const yr = y => y < 0 ? `${-y} BC` : (y < 100 ? `AD ${y}` : `${y}`);
@@ -50,11 +50,14 @@
     $("yD").textContent = yr(f[3]);
     const km = CG.lifeDistance(f);
     $("span").textContent = `Lived about ${age(f)} years · ` +
-      (km < 2 ? "died where they were born" : km < 30 ? `born and died ${fmt(km)} km apart` : `${fmt(km)} km from cradle to grave`);
+      (km < 2 ? "died where they were born" : `born and died ${fmt(km)} km apart`);
     $("play").hidden = false; $("answer").hidden = true;
     $("guess").value = "";
     map.show(f);
     render();
+    // Fetch the portrait now so it's ready the moment the answer is revealed.
+    const portrait = CG.PORTRAITS[f[0]];
+    if (portrait && portrait.img) new Image().src = portrait.img;
     if (window.matchMedia("(min-width: 681px)").matches) setTimeout(() => $("guess").focus({ preventScroll: true }), 50);
   }
 
@@ -135,11 +138,24 @@
     $("verdict").className = "verdict " + (win ? "win" : "lose");
     $("name").textContent = f[0];
     $("desc").textContent = f[1];
+    showPortrait(f);
     $("approx").hidden = !f[6];
     $("pts").textContent = `+${fmt(pts)}`;
     $("nextLabel").textContent = round + 1 < ROUNDS ? "Next figure" : "See final score";
     render();
     $("next").focus({ preventScroll: true });
+  }
+
+  function showPortrait(f) {
+    const p = CG.PORTRAITS[f[0]] || {}, img = $("portraitImg"), frame = $("portrait");
+    frame.hidden = !p.img;
+    if (p.img) {
+      img.onerror = () => { frame.hidden = true; };
+      img.src = p.img;
+      img.alt = `Portrait of ${f[0]}`;
+    }
+    $("wiki").hidden = !p.page;
+    if (p.page) $("wiki").href = p.page;
   }
 
   $("next").onclick = () => { if (round + 1 < ROUNDS) { round++; startRound(); } else finish(); };
@@ -166,9 +182,15 @@
         fmt(r.pts),
       ];
       cells.forEach((c, i) => { const td = document.createElement("td"); td.textContent = c; if (i === 2) td.className = "n"; tr.append(td); });
+      const p = CG.PORTRAITS[r.name];
+      if (p && p.img) {
+        const img = document.createElement("img");
+        img.className = "face"; img.src = p.img; img.alt = ""; img.onerror = () => img.remove();
+        tr.firstChild.prepend(img);
+      }
       return tr;
     }));
-    $("shareText").value = `Cradle & Grave ${fmt(t)} / ${fmt(max)}\n${results.map(square).join("")}\n${SITE}`;
+    $("shareText").value = `Lifelines ${fmt(t)} / ${fmt(max)}\n${results.map(square).join("")}\n${SITE}`;
     $("shareMsg").textContent = "";
     $("final").hidden = false;
     $("again").focus();

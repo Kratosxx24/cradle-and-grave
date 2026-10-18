@@ -1,8 +1,8 @@
-# Cradle & Grave
+# Lifelines
 
-A guess-who game on a map. The map shows where a famous historical figure was born and where they died, with the year of each. You type in who it is.
+A guess-who game on a map. The map shows where a famous historical figure was born and where they died, with the year of each. You type in who it is, and the answer comes with their portrait.
 
-**Play online:** https://kratosxx24.github.io/cradle-and-grave/
+**Play online:** https://kratosxx24.github.io/lifelines/
 
 ## How it plays
 
@@ -37,6 +37,8 @@ To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson
 | `js/match.js` | Name matching and "did you mean" suggestions |
 | `js/map.js` | The D3 world map, pins and zoom |
 | `js/game.js` | Rounds, hints, scoring, final screen |
+| `data/portraits.js` | Portrait image and Wikipedia link for each figure (generated) |
+| `scripts/fetch-portraits.js` | Regenerates `data/portraits.js` from Wikipedia (`npm run portraits`) |
 | `data/atlas.js` | Country outlines (Natural Earth 1:50m via [world-atlas](https://github.com/topojson/world-atlas)) |
 | `tests/` | Node tests for `match.js` and the data |
 
@@ -54,4 +56,6 @@ Add a row to `CG.POOL` in `js/figures.js`:
 - Add a trailing `1` to mark a disputed location. The reveal then shows a note.
 - The full name and the surname are accepted automatically. If the surname alone is wrong ("Alexander the Great") or people use a nickname ("MLK"), list the accepted spellings in `CG.ALIASES`. When an entry exists, it replaces the surname rule.
 
-Run `npm test` afterwards. One test checks that no figure's name is accepted as somebody else.
+Then run `npm run portraits` to fetch their picture, and `npm test`. One test checks that no figure's name is accepted as somebody else.
+
+Portraits are the lead image of each figure's Wikipedia article, loaded from Wikimedia Commons; the reveal links to the article. If a name lands on the wrong article, add the right title to `TITLES` in `scripts/fetch-portraits.js`.

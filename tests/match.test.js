@@ -88,3 +88,11 @@ test("regnal numbers and shared names stay distinct", () => {
   assert.ok(CG.accepts("2pac", fig("Tupac Shakur")));
   assert.ok(CG.accepts("Malcolm X", fig("Malcolm X")));
 });
+
+test("every figure has a portrait entry", () => {
+  const { PORTRAITS } = require("../data/portraits.js");
+  for (const f of CG.POOL) {
+    assert.ok(PORTRAITS[f[0]], `${f[0]} is missing from data/portraits.js (run npm run portraits)`);
+    assert.ok(PORTRAITS[f[0]].page, `${f[0]} has no Wikipedia link`);
+  }
+});
