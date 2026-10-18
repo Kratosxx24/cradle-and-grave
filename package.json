@@ -3,7 +3,7 @@
   "private": true,
   "description": "A map traces where a famous figure's life began and ended. Name them.",
   "scripts": {
-    "start": "python3 -m http.server 8765",
+    "start": "node scripts/serve.js",
     "test": "node --test tests/*.test.js",
     "portraits": "node scripts/fetch-portraits.js"
   }

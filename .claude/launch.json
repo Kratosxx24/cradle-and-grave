@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "game", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8765"], "port": 8765 }
+    { "name": "game", "runtimeExecutable": "node", "runtimeArgs": ["scripts/serve.js"], "port": 8765 }
   ]
 }

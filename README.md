@@ -17,7 +17,7 @@ A guess-who game on a map. The map shows where a famous historical figure was bo
 npm start
 ```
 
-Then open http://localhost:8765. Opening `index.html` directly also works.
+Then open http://localhost:8765. Nothing to install — it is a plain Node static server, and `PORT` overrides the port. Opening `index.html` directly also works.
 
 ```bash
 npm test
@@ -38,6 +38,7 @@ To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson
 | `js/map.js` | The D3 world map, pins and zoom |
 | `js/game.js` | Rounds, hints, scoring, final screen |
 | `data/portraits.js` | Portrait image and Wikipedia link for each figure (generated) |
+| `scripts/serve.js` | The local static server (`npm start`) |
 | `scripts/fetch-portraits.js` | Regenerates `data/portraits.js` from Wikipedia (`npm run portraits`) |
 | `icons/` | Favicon and home-screen icons. `favicon.svg` and `icon-full.svg` are the sources; the PNGs are rendered from them |
 | `manifest.webmanifest` | App name and icons for Add to Home Screen |
