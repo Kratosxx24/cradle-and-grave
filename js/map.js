@@ -4,8 +4,8 @@
 // unzoomed layer in screen pixels and are re-placed on every zoom so they stay crisp.
 (function (CG) {
   const W = 960, H = 500;
-  const MIN_SPAN_KM = 600;  // never zoom in tighter than this, so there's region left to recognise
-  const MAX_FIT_ZOOM = 40;  // relative to the whole world fitting the screen
+  const MIN_SPAN_KM = 2000; // never zoom in tighter than this, so neighbouring countries stay in view
+  const MAX_FIT_ZOOM = 14;  // relative to the whole world fitting the screen
   const ll = p => [p[1], p[0]]; // [lat, lon, ...] -> [lon, lat]
 
   CG.createMap = function (svgEl, { yr }) {

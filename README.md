@@ -40,7 +40,7 @@ To jump straight to one figure while testing, run `CG.dev.play("Thomas Jefferson
 | `data/atlas.js` | Country outlines (Natural Earth 1:50m via [world-atlas](https://github.com/topojson/world-atlas)) |
 | `tests/` | Node tests for `match.js` and the data |
 
-D3 and topojson-client load from CDNs. There is no build step.
+D3 and topojson-client load from CDNs. There is no build step. When you change a CSS or JS file, bump the `?v=` number on its tag in `index.html` so browsers don't keep a cached copy.
 
 ## Adding a figure
 
