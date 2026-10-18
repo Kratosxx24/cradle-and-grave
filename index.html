@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: one framed survey-chart map fills the screen; the figure dossier floats bottom-left (stacks under the map on phones). */
+/* Layout: one framed survey-chart map fills the screen; the case file floats bottom-left (stacks under the map on phones). */
 :root {
   --bg: #e9eef0;
   --ink: #17242b;
@@ -19,12 +19,14 @@
   --land-hi: #ffffff;
   --border: #9fb0b7;
   --panel: #ffffffee;
+  --field: #ffffff;
   --line: #c9d5da;
   --born: #0b7f72;
   --died: #b8322b;
   --life: #17242b;
   --btn: #17242b;
   --btn-fg: #f6f7f4;
+  --good: #1f7a3d;
   --display: "Libre Caslon Display", "Didot", "Bodoni 72", Georgia, serif;
   --body: "Work Sans", "Helvetica Neue", Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
@@ -32,22 +34,22 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0b1419; --ink: #e4ecee; --muted: #8fa2aa; --ocean: #0f1e26; --grat: #1b313c;
-    --land: #23353e; --land-hi: #2b4049; --border: #3f5864; --panel: #13222aee; --line: #2a3f49;
-    --born: #3fd1bd; --died: #ff7065; --life: #e4ecee; --btn: #e4ecee; --btn-fg: #0b1419; color-scheme: dark;
+    --land: #23353e; --land-hi: #2b4049; --border: #3f5864; --panel: #13222aee; --field: #0f1c23; --line: #2a3f49;
+    --born: #3fd1bd; --died: #ff7065; --life: #e4ecee; --btn: #e4ecee; --btn-fg: #0b1419; --good: #5fd38a; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0b1419; --ink: #e4ecee; --muted: #8fa2aa; --ocean: #0f1e26; --grat: #1b313c;
-  --land: #23353e; --land-hi: #2b4049; --border: #3f5864; --panel: #13222aee; --line: #2a3f49;
-  --born: #3fd1bd; --died: #ff7065; --life: #e4ecee; --btn: #e4ecee; --btn-fg: #0b1419; color-scheme: dark;
+  --land: #23353e; --land-hi: #2b4049; --border: #3f5864; --panel: #13222aee; --field: #0f1c23; --line: #2a3f49;
+  --born: #3fd1bd; --died: #ff7065; --life: #e4ecee; --btn: #e4ecee; --btn-fg: #0b1419; --good: #5fd38a; color-scheme: dark;
 }
 html, body { height: 100%; margin: 0; }
 [hidden] { display: none !important; }
+* { box-sizing: border-box; }
 body {
   background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px;
-  padding-inline: 16px; padding-block: 12px; box-sizing: border-box;
+  padding-inline: 16px; padding-block: 12px;
 }
-* { box-sizing: border-box; }
 .app { height: 100%; display: grid; grid-template-rows: auto 1fr; gap: 10px; max-width: 1500px; margin: 0 auto; }
 header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
@@ -58,66 +60,77 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 .tally span { color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: 11px; margin-right: 6px; }
 
 .stage { position: relative; min-height: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--ocean); }
-#map { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
-#map.revealed { cursor: grab; }
+#map { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+#map:active { cursor: grabbing; }
 .sphere { fill: var(--ocean); }
 .grat { fill: none; stroke: var(--grat); stroke-width: .6; vector-effect: non-scaling-stroke; }
 .land { fill: var(--land); }
 .border { fill: none; stroke: var(--border); stroke-width: .6; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 .coast { fill: none; stroke: var(--border); stroke-width: .9; vector-effect: non-scaling-stroke; }
-.miss { fill: none; stroke-width: 1.6; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
-.miss.b { stroke: var(--born); } .miss.d { stroke: var(--died); }
-.life { fill: none; stroke: var(--life); stroke-width: 2; vector-effect: non-scaling-stroke; opacity: .75; }
-.pin text { font-family: var(--mono); font-size: 10px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-.pin.guess circle { fill: var(--panel); stroke-width: 2.5; }
-.pin.guess.b circle { stroke: var(--born); } .pin.guess.d circle { stroke: var(--died); }
-.pin.guess.b text { fill: var(--born); } .pin.guess.d text { fill: var(--died); }
-.pin.real circle { stroke: var(--panel); stroke-width: 2.5; }
-.pin.real.b circle { fill: var(--born); } .pin.real.d circle { fill: var(--died); }
-.pin.real text { fill: var(--panel); }
-.pin .tag { font-family: var(--body); font-size: 12px; font-weight: 600; text-anchor: start; fill: var(--ink); paint-order: stroke; stroke: var(--land-hi); stroke-width: 4px; stroke-linejoin: round; }
+.life { fill: none; stroke: var(--life); stroke-width: 2; stroke-dasharray: 2 5; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .7; }
+.pin text { pointer-events: none; }
+.pin circle { stroke: var(--panel); stroke-width: 2.5; }
+.pin.b circle { fill: var(--born); } .pin.d circle { fill: var(--died); }
+.pin .glyph { font-family: var(--mono); font-size: 10px; font-weight: 600; text-anchor: middle; dominant-baseline: central; fill: var(--panel); }
+.pin .tag { font-family: var(--mono); font-size: 13px; font-weight: 600; dominant-baseline: central; paint-order: stroke; stroke: var(--land-hi); stroke-width: 4px; stroke-linejoin: round; }
+.pin.b .tag { fill: var(--born); } .pin.d .tag { fill: var(--died); }
+.pin .place { font-family: var(--body); font-size: 12px; font-weight: 500; fill: var(--ink); dominant-baseline: central; paint-order: stroke; stroke: var(--land-hi); stroke-width: 4px; stroke-linejoin: round; }
 
 .zoomctl { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); }
 .zoomctl button { width: 34px; height: 34px; border: 0; background: transparent; color: var(--ink); font: 600 17px var(--mono); cursor: pointer; }
 .zoomctl button + button { border-top: 1px solid var(--line); }
 .zoomctl button:hover { background: var(--line); }
-.hint { position: absolute; top: 12px; left: 12px; font-size: 12px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; max-width: calc(100% - 80px); }
 
 .card {
-  position: absolute; left: 14px; bottom: 14px; width: 360px; max-width: calc(100% - 28px);
+  position: absolute; left: 14px; bottom: 14px; width: 380px; max-width: calc(100% - 28px); max-height: calc(100% - 28px); overflow: auto;
   background: var(--panel); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 8px;
   padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 30px #0000001f;
 }
-.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
-.eyebrow b { font-weight: 600; color: var(--ink); font-family: var(--mono); letter-spacing: 0; }
-.who h2 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.05; margin: 4px 0 4px; text-wrap: balance; }
-.who .life-yrs { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.slots { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.slot {
-  text-align: left; border: 1.5px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px;
-  padding: 9px 10px; cursor: pointer; font: inherit; display: flex; flex-direction: column; gap: 3px; min-width: 0;
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.clues { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.clue { border: 1.5px solid var(--line); border-radius: 6px; padding: 9px 11px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.clue .k { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; }
+.clue.b .k { color: var(--born); } .clue.d .k { color: var(--died); }
+.clue .yr { font-family: var(--mono); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.clue .pl { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.extra { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.extra div b { font-weight: 600; }
+.extra small { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .09em; margin-right: 6px; }
+
+.hints { display: flex; flex-wrap: wrap; gap: 6px; }
+.hints button {
+  border: 1px dashed var(--border); background: transparent; color: var(--ink); border-radius: 99px; padding: 5px 10px;
+  font: 500 12px var(--body); cursor: pointer;
 }
-.slot .k { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-.slot .k::before { content: ""; width: 9px; height: 9px; border-radius: 50%; border: 2px solid currentColor; }
-.slot.b .k { color: var(--born); } .slot.d .k { color: var(--died); }
-.slot .v { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.slot.active.b { border-color: var(--born); box-shadow: inset 0 0 0 1px var(--born); }
-.slot.active.d { border-color: var(--died); box-shadow: inset 0 0 0 1px var(--died); }
-.slot:disabled { cursor: default; }
+.hints button span { font-family: var(--mono); color: var(--muted); margin-left: 4px; }
+.hints button:hover { border-style: solid; }
+.hints button:disabled { opacity: .35; cursor: default; text-decoration: line-through; }
+
+form.ask { display: flex; gap: 8px; }
+form.ask input {
+  flex: 1; min-width: 0; padding: 11px 12px; border-radius: 6px; border: 1.5px solid var(--line); background: var(--field);
+  color: var(--ink); font: 500 15px var(--body);
+}
+form.ask input:focus { outline: none; border-color: var(--ink); }
+form.ask input.shake { animation: shake .35s; border-color: var(--died); }
+@keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .go {
-  border: 0; border-radius: 6px; padding: 12px 14px; background: var(--btn); color: var(--btn-fg);
-  font: 600 14px var(--body); cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  border: 0; border-radius: 6px; padding: 11px 14px; background: var(--btn); color: var(--btn-fg);
+  font: 600 14px var(--body); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px;
 }
-.go:disabled { opacity: .35; cursor: not-allowed; }
 .go kbd { font: 11px var(--mono); opacity: .6; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.link { border: 0; background: none; color: var(--muted); font: 500 13px var(--body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 0; }
+.misses { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
+.misses s { color: var(--died); }
+.worth { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 button:focus-visible { outline: 2px solid var(--born); outline-offset: 2px; }
-.results { display: flex; flex-direction: column; gap: 10px; }
-.res { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding-top: 10px; border-top: 1px solid var(--line); }
-.res .place { font-weight: 600; min-width: 0; }
-.res .place small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .09em; }
-.res.b .place small { color: var(--born); } .res.d .place small { color: var(--died); }
-.res .pts { font-family: var(--mono); font-weight: 600; font-size: 16px; text-align: right; font-variant-numeric: tabular-nums; }
-.res .km { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.answer h2 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.05; margin: 4px 0; text-wrap: balance; }
+.answer .verdict { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; }
+.answer .verdict.win { color: var(--good); } .answer .verdict.lose { color: var(--died); }
+.answer .desc { color: var(--muted); }
+.answer .pts { font-family: var(--mono); font-size: 18px; font-weight: 600; }
 .note { font-size: 12px; color: var(--muted); margin: 0; }
 
 .final { position: absolute; inset: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 70%, transparent); padding: 16px; }
@@ -129,28 +142,24 @@ button:focus-visible { outline: 2px solid var(--born); outline-offset: 2px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 td, th { padding: 7px 4px; border-top: 1px solid var(--line); text-align: left; }
 th { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 600; border-top: 0; }
-td.n { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
-th.n { text-align: right; }
+td.n, th.n { text-align: right; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
 @media (max-width: 680px) {
   .stage { display: flex; flex-direction: column; border: 0; background: transparent; overflow: visible; }
-  #map { flex: 1; min-height: 260px; border: 1px solid var(--line); border-radius: 6px; background: var(--ocean); }
-  .card { position: static; width: 100%; max-width: none; margin-top: 10px; box-shadow: none; padding: 14px; gap: 12px; }
-  .who h2 { font-size: 28px; }
+  #map { flex: 1; min-height: 240px; border: 1px solid var(--line); border-radius: 6px; background: var(--ocean); }
+  .card { position: static; width: 100%; max-width: none; max-height: none; margin-top: 10px; box-shadow: none; padding: 14px; gap: 12px; }
   .brand p { display: none; }
-  .hint { display: none; }
-  .app { grid-template-rows: auto 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
-
 <div class="app">
   <header>
     <div class="brand">
       <h1>Cradle <i>&amp;</i> Grave</h1>
-      <p>Pin where they were born, then where they died.</p>
+      <p>Where they were born, where they died. Name them.</p>
     </div>
     <div class="tally">
       <div><span>Figure</span><b id="roundNo">1 / 5</b></div>
@@ -159,39 +168,61 @@ th.n { text-align: right; }
   </header>
 
   <div class="stage">
-    <svg id="map" aria-label="World map. Click to place a pin."></svg>
-    <div class="hint" id="hint">Scroll or pinch to zoom. Drag to pan. Click to drop a pin.</div>
+    <svg id="map" aria-label="World map showing a birthplace and a deathplace"></svg>
     <div class="zoomctl">
       <button id="zin" aria-label="Zoom in">+</button>
       <button id="zout" aria-label="Zoom out">&minus;</button>
-      <button id="zreset" aria-label="Reset view">&#8634;</button>
+      <button id="zfit" aria-label="Zoom to the two pins">&#8634;</button>
     </div>
 
     <div class="card" id="card">
-      <div class="who">
-        <div class="eyebrow"><span id="desc"></span></div>
+      <div class="eyebrow" id="who">Who is this?</div>
+      <div class="clues">
+        <div class="clue b"><span class="k">Born</span><span class="yr" id="yB"></span><span class="pl" id="pB"></span></div>
+        <div class="clue d"><span class="k">Died</span><span class="yr" id="yD"></span><span class="pl" id="pD"></span></div>
+      </div>
+      <div class="extra" id="extra" hidden></div>
+
+      <div id="play">
+        <div class="hints" id="hints" style="margin-bottom:12px">
+          <button data-h="places" id="hPlaces">Place names<span>−250</span></button>
+          <button data-h="field" id="hField">Known for<span>−250</span></button>
+          <button data-h="initials" id="hInit">Initials<span>−250</span></button>
+        </div>
+        <form class="ask" id="ask" autocomplete="off">
+          <input id="guess" name="guess" placeholder="Type a name, e.g. Isaac Newton" aria-label="Your guess" spellcheck="false" autocapitalize="words">
+          <button class="go" type="submit">Guess</button>
+        </form>
+        <div class="row" style="margin-top:10px">
+          <span class="worth" id="worth">Worth 1,000</span>
+          <button class="link" id="giveup" type="button">Give up and reveal</button>
+        </div>
+        <div class="misses" id="misses" style="margin-top:8px"></div>
+      </div>
+
+      <div class="answer" id="answer" hidden>
+        <div class="verdict" id="verdict"></div>
         <h2 id="name"></h2>
-        <div class="life-yrs" id="years"></div>
+        <div class="desc" id="desc"></div>
+        <p class="note" id="approx" hidden>Historians disagree on the exact spot; this uses the most commonly cited location.</p>
+        <div class="row" style="margin-top:12px">
+          <span class="pts" id="pts"></span>
+          <button class="go" id="next"><span id="nextLabel">Next figure</span><kbd>Enter</kbd></button>
+        </div>
       </div>
-      <div class="slots" id="slots">
-        <button class="slot b" id="slotB"><span class="k">Born</span><span class="v" id="vB">Click the map</span></button>
-        <button class="slot d" id="slotD"><span class="k">Died</span><span class="v" id="vD">Not placed</span></button>
-      </div>
-      <div class="results" id="results" hidden></div>
-      <button class="go" id="go" disabled><span id="goLabel">Submit both pins</span><kbd>Enter</kbd></button>
     </div>
 
     <div class="final" id="final" hidden>
       <div class="sheet">
         <div>
-          <div class="eyebrow"><span>Final atlas</span></div>
-          <h2>Expedition complete</h2>
+          <div class="eyebrow">Final tally</div>
+          <h2>Case closed</h2>
         </div>
-        <div class="big" id="finalScore">0 <small>/ 50,000</small></div>
+        <div class="big" id="finalScore">0 <small>/ 5,000</small></div>
         <p class="rank" id="rank"></p>
         <div style="overflow-x:auto">
           <table>
-            <thead><tr><th>Figure</th><th class="n">Born off</th><th class="n">Died off</th><th class="n">Points</th></tr></thead>
+            <thead><tr><th>Figure</th><th>Result</th><th class="n">Points</th></tr></thead>
             <tbody id="ftable"></tbody>
           </table>
         </div>
@@ -205,7 +236,7 @@ th.n { text-align: right; }
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="atlas.js"></script>
 <script>
-// [name, descriptor, birth year, death year, [lat, lon, birthplace], [lat, lon, deathplace]]
+// [name, known for, birth year, death year, [lat, lon, birthplace], [lat, lon, deathplace], disputed?]
 // Negative years are BC.
 const POOL = [
   ["Albert Einstein","Physicist",1879,1955,[48.40,9.99,"Ulm, Germany"],[40.35,-74.66,"Princeton, New Jersey"]],
@@ -232,7 +263,7 @@ const POOL = [
   ["Galileo Galilei","Astronomer",1564,1642,[43.72,10.40,"Pisa"],[43.75,11.25,"Arcetri, Florence"]],
   ["Martin Luther King Jr.","Civil rights leader",1929,1968,[33.75,-84.39,"Atlanta, Georgia"],[35.13,-90.05,"Memphis, Tennessee"]],
   ["John F. Kennedy","35th U.S. president",1917,1963,[42.33,-71.12,"Brookline, Massachusetts"],[32.78,-96.81,"Dallas, Texas"]],
-  ["Mao Zedong","Chairman of the CCP",1893,1976,[27.92,112.53,"Shaoshan, Hunan"],[39.90,116.40,"Beijing"]],
+  ["Mao Zedong","Chairman of the Chinese Communist Party",1893,1976,[27.92,112.53,"Shaoshan, Hunan"],[39.90,116.40,"Beijing"]],
   ["Joan of Arc","French military heroine",1412,1431,[48.44,5.67,"Domrémy, France"],[49.44,1.09,"Rouen, France"]],
   ["Frida Kahlo","Painter",1907,1954,[19.35,-99.16,"Coyoacán, Mexico City"],[19.35,-99.16,"Coyoacán, Mexico City"]],
   ["Pablo Picasso","Painter",1881,1973,[36.72,-4.42,"Málaga, Spain"],[43.60,7.00,"Mougins, France"]],
@@ -259,7 +290,7 @@ const POOL = [
   ["Diana, Princess of Wales","Royal",1961,1997,[52.83,0.51,"Sandringham, Norfolk"],[48.84,2.36,"Paris"]],
   ["Frederick Douglass","Abolitionist",1818,1895,[38.88,-76.02,"Talbot County, Maryland"],[38.86,-76.99,"Washington, D.C."]],
   ["Ho Chi Minh","Vietnamese revolutionary",1890,1969,[18.70,105.57,"Nghệ An, Vietnam"],[21.03,105.83,"Hanoi"]],
-  ["Vladimir Lenin","Soviet founder",1870,1924,[54.32,48.40,"Simbirsk, Russia"],[55.50,37.77,"Gorki, near Moscow"]],
+  ["Vladimir Lenin","Founder of the Soviet Union",1870,1924,[54.32,48.40,"Simbirsk, Russia"],[55.50,37.77,"Gorki, near Moscow"]],
   ["Fidel Castro","Cuban revolutionary",1926,2016,[20.67,-75.88,"Birán, Cuba"],[23.11,-82.37,"Havana"]],
   ["Mother Teresa","Missionary nun",1910,1997,[41.99,21.43,"Skopje"],[22.57,88.36,"Kolkata, India"]],
   ["Dante Alighieri","Poet",1265,1321,[43.77,11.26,"Florence"],[44.42,12.20,"Ravenna"]],
@@ -277,7 +308,7 @@ const POOL = [
   ["Hernán Cortés","Conquistador",1485,1547,[38.96,-5.96,"Medellín, Spain"],[37.39,-6.05,"Castilleja de la Cuesta, Spain"]],
   ["Hannibal","Carthaginian general",-247,-183,[36.85,10.32,"Carthage"],[40.80,29.43,"Libyssa, Bithynia"]],
   ["Augustus","First Roman emperor",-63,14,[41.89,12.49,"Rome"],[40.93,14.53,"Nola, Campania"]],
-  ["Siddhartha Gautama (the Buddha)","Founder of Buddhism",-563,-483,[27.47,83.28,"Lumbini, Nepal"],[26.74,83.89,"Kushinagar, India"],1],
+  ["Siddhartha Gautama","Founder of Buddhism",-563,-483,[27.47,83.28,"Lumbini, Nepal"],[26.74,83.89,"Kushinagar, India"],1],
   ["Rumi","Poet and mystic",1207,1273,[36.76,66.90,"Balkh, Afghanistan"],[37.87,32.48,"Konya, Anatolia"]],
   ["Suleiman the Magnificent","Ottoman sultan",1494,1566,[41.00,39.72,"Trabzon"],[46.05,17.80,"Szigetvár, Hungary"]],
   ["Akbar","Mughal emperor",1542,1605,[25.36,69.74,"Umerkot, Sindh"],[27.18,78.01,"Agra, India"]],
@@ -315,9 +346,97 @@ const POOL = [
   ["Henry VIII","King of England",1491,1547,[51.48,0.00,"Greenwich, London"],[51.50,-0.13,"Whitehall, London"]],
 ];
 
-const ROUNDS = 5, MAX = 5000, R_EARTH = 6371;
+// Accepted answers besides the full name. Figures not listed here also accept their surname.
+const ALIASES = {
+  "Napoleon Bonaparte": ["napoleon", "bonaparte", "napoleon i"],
+  "Cleopatra VII": ["cleopatra"],
+  "Alexander the Great": ["alexander", "alexander iii"],
+  "Leonardo da Vinci": ["leonardo", "da vinci", "davinci"],
+  "Mahatma Gandhi": ["gandhi", "mohandas gandhi", "mohandas karamchand gandhi"],
+  "Vincent van Gogh": ["van gogh", "gogh"],
+  "Galileo Galilei": ["galileo", "galilei"],
+  "Martin Luther King Jr.": ["martin luther king", "mlk", "king", "mlk jr"],
+  "John F. Kennedy": ["jfk", "kennedy", "john kennedy"],
+  "Mao Zedong": ["mao", "mao tse tung", "chairman mao"],
+  "Joan of Arc": ["joan", "jeanne d arc"],
+  "Queen Victoria": ["victoria"],
+  "Elizabeth I": ["elizabeth", "queen elizabeth", "queen elizabeth i", "elizabeth the first"],
+  "Peter the Great": ["peter", "peter i", "peter the first"],
+  "Catherine the Great": ["catherine", "catherine ii"],
+  "Che Guevara": ["che", "guevara", "ernesto guevara"],
+  "Muhammad Ali": ["ali", "cassius clay", "mohammed ali"],
+  "Elvis Presley": ["elvis", "presley"],
+  "Diana, Princess of Wales": ["diana", "princess diana", "lady diana", "lady di", "diana spencer"],
+  "Ho Chi Minh": [],
+  "Vladimir Lenin": ["lenin"],
+  "Mother Teresa": ["teresa", "saint teresa"],
+  "Dante Alighieri": ["dante", "alighieri"],
+  "Franklin D. Roosevelt": ["fdr", "roosevelt", "franklin roosevelt"],
+  "James Cook": ["cook", "captain cook", "captain james cook"],
+  "Augustus": ["octavian", "caesar augustus"],
+  "Siddhartha Gautama": ["buddha", "the buddha", "gautama", "siddhartha", "gautama buddha"],
+  "Suleiman the Magnificent": ["suleiman", "suleiman i"],
+  "Tokugawa Ieyasu": ["tokugawa", "ieyasu", "ieyasu tokugawa"],
+  "Oda Nobunaga": ["nobunaga", "nobunaga oda"],
+  "Genghis Khan": ["genghis", "chinggis khan", "temujin", "chingis khan"],
+  "Bruce Lee": [],
+  "Freddie Mercury": ["mercury"],
+  "Mustafa Kemal Atatürk": ["ataturk", "kemal ataturk", "mustafa kemal"],
+  "Charles de Gaulle": ["de gaulle", "gaulle"],
+  "Archduke Franz Ferdinand": ["franz ferdinand", "ferdinand"],
+  "Toussaint Louverture": ["toussaint", "louverture", "toussaint l ouverture"],
+  "Richard the Lionheart": ["richard", "richard i", "lionheart", "richard the lionhearted"],
+  "William the Conqueror": ["william", "william i", "conqueror"],
+  "Marie Antoinette": ["antoinette"],
+  "Lord Byron": ["byron", "george gordon byron"],
+  "Pyotr Ilyich Tchaikovsky": ["tchaikovsky", "peter tchaikovsky"],
+  "Sun Yat-sen": ["sun yat sen", "sun yatsen"],
+  "Kobe Bryant": ["kobe", "bryant"],
+  "Fyodor Dostoevsky": ["dostoevsky", "dostoyevsky"],
+  "Henry VIII": ["henry", "henry 8", "henry the eighth", "king henry"],
+  "Grigori Rasputin": ["rasputin"],
+  "Wolfgang Amadeus Mozart": ["mozart", "wolfgang mozart"],
+  "Johann Sebastian Bach": ["bach", "js bach"],
+  "Ludwig van Beethoven": ["beethoven"],
+  "Edgar Allan Poe": ["poe", "edgar poe"],
+  "Pelé": ["pele", "edson arantes do nascimento"],
+  "Simón Bolívar": ["bolivar"],
+};
+
+const ROUNDS = 5, BASE = 1000, HINT_COST = 250, MISS_COST = 100, FLOOR = 100;
 const W = 960, H = 500;
 const $ = id => document.getElementById(id);
+
+// ---------- matching ----------
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+  .replace(/[ʻ'’.,]/g, "").replace(/[-_/]/g, " ").replace(/\s+/g, " ").trim();
+// Edit distance where swapping two adjacent letters counts as one typo.
+function lev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    const c = a[i - 1] === b[j - 1] ? 0 : 1;
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+    if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+  }
+  return d[a.length][b.length];
+}
+function answers(f) {
+  const full = norm(f[0]);
+  const extra = ALIASES[f[0]];
+  if (extra) return [full, ...extra.map(norm)];
+  const last = full.split(" ").pop();
+  return last.length > 3 ? [full, last] : [full];
+}
+function isMatch(guess, f) {
+  const g = norm(guess);
+  if (!g) return false;
+  return answers(f).some(a => {
+    if (g === a) return true;
+    const slack = a.length >= 9 ? 2 : a.length >= 5 ? 1 : 0;
+    return slack > 0 && lev(g, a) <= slack;
+  });
+}
 
 // ---------- map ----------
 const proj = d3.geoNaturalEarth1().fitExtent([[6, 6], [W - 6, H - 6]], { type: "Sphere" });
@@ -334,16 +453,16 @@ const gLines = gMap.append("g");
 const gPins = svg.append("g");
 
 let T = d3.zoomIdentity;
-const zoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[0, 0], [W, H]]).clickDistance(6)
+const zoom = d3.zoom().scaleExtent([1, 60]).translateExtent([[0, 0], [W, H]])
   .on("zoom", e => { T = e.transform; gMap.attr("transform", T); drawPins(); });
-svg.call(zoom).on("dblclick.zoom", null);
+svg.call(zoom);
 $("zin").onclick = () => svg.transition().duration(250).call(zoom.scaleBy, 2);
 $("zout").onclick = () => svg.transition().duration(250).call(zoom.scaleBy, 0.5);
-$("zreset").onclick = () => svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+$("zfit").onclick = () => fitTo();
 
 // ---------- state ----------
 let deck = [], cursor = 0, round = 0, picks = [], results = [];
-let guess = { b: null, d: null }, active = "b", revealed = false;
+let hints = new Set(), misses = [], done = false, won = false;
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function newGame() {
@@ -352,170 +471,149 @@ function newGame() {
   round = 0; results = []; $("final").hidden = true; startRound();
 }
 const fig = () => POOL[picks[round]];
-const ll = p => [p[1], p[0]]; // [lat,lon,...] -> [lon,lat]
-
-function yr(y) { return y < 0 ? `${-y} BC` : `${y}`; }
-function lifespan(f) {
-  const [b, d] = [f[2], f[3]];
-  const s = b < 0 && d > 0 ? `${-b} BC – AD ${d}` : b < 0 ? `${-b} – ${-d} BC` : `${b} – ${d}`;
-  return `${s}  ·  aged about ${d - b - (b < 0 && d > 0 ? 1 : 0)}`;
-}
-function fmtLL(c) { const [lon, lat] = c; return `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? "N" : "S"} ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? "E" : "W"}`; }
-const km = (a, b) => d3.geoDistance(a, b) * R_EARTH;
-const score = d => d < 25 ? MAX : Math.round(MAX * Math.exp(-d / 1500));
+const ll = p => [p[1], p[0]]; // [lat, lon, ...] -> [lon, lat]
+const yr = y => y < 0 ? `${-y} BC` : (y < 100 ? `AD ${y}` : `${y}`);
 const fmt = n => n.toLocaleString("en-US");
-const fmtKm = d => d < 10 ? `${d.toFixed(1)} km` : `${fmt(Math.round(d))} km`;
+const worth = () => done ? 0 : Math.max(FLOOR, BASE - HINT_COST * hints.size - MISS_COST * misses.length);
+const initials = name => name.replace(/,.*$/, "").split(/\s+/).filter(w => /^[A-ZÀ-Ž]/.test(w) && !/^((I|V|X)+|Jr)\.?$/.test(w)).map(w => w[0] + ".").join(" ");
 
 function startRound() {
   const f = fig();
-  guess = { b: null, d: null }; active = "b"; revealed = false;
-  $("desc").textContent = f[1];
-  $("name").textContent = f[0];
-  $("years").textContent = lifespan(f);
+  hints = new Set(); misses = []; done = false; won = false;
   $("roundNo").textContent = `${round + 1} / ${ROUNDS}`;
   $("total").textContent = fmt(results.reduce((s, r) => s + r.pts, 0));
-  $("slots").hidden = false; $("results").hidden = true;
-  $("map").classList.remove("revealed");
+  $("who").textContent = "Who is this?";
+  $("yB").textContent = yr(f[2]);
+  $("yD").textContent = yr(f[3]);
+  $("play").hidden = false; $("answer").hidden = true;
+  $("guess").value = "";
   gLines.selectAll("*").remove();
-  svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
-  sync();
+  gLines.append("path").datum({ type: "LineString", coordinates: [ll(f[4]), ll(f[5])] }).attr("class", "life").attr("d", path);
+  render();
+  fitTo();
+  setTimeout(() => { if (window.innerWidth > 680) $("guess").focus({ preventScroll: true }); }, 50);
 }
 
-function sync() {
-  for (const k of ["b", "d"]) {
-    const el = $(k === "b" ? "slotB" : "slotD");
-    el.classList.toggle("active", active === k && !revealed);
-    $(k === "b" ? "vB" : "vD").textContent = guess[k] ? fmtLL(guess[k]) : (active === k ? "Click the map" : "Not placed");
-  }
-  const go = $("go");
-  if (revealed) { go.disabled = false; $("goLabel").textContent = round + 1 < ROUNDS ? "Next figure" : "See final score"; }
-  else { go.disabled = !(guess.b && guess.d); $("goLabel").textContent = guess.b && guess.d ? "Submit both pins" : guess.b ? "Now pin where they died" : "Pin where they were born"; }
+function render() {
+  const f = fig(), showPlaces = hints.has("places") || done;
+  $("pB").textContent = showPlaces ? f[4][2] : "";
+  $("pD").textContent = showPlaces ? f[5][2] : "";
+  const extra = $("extra");
+  extra.innerHTML = "";
+  if (!done && hints.has("field")) extra.insertAdjacentHTML("beforeend", `<div><small>Known for</small><b></b></div>`), extra.lastChild.querySelector("b").textContent = f[1];
+  if (!done && hints.has("initials")) extra.insertAdjacentHTML("beforeend", `<div><small>Initials</small><b></b></div>`), extra.lastChild.querySelector("b").textContent = initials(f[0]);
+  extra.hidden = !extra.childElementCount;
+  for (const b of $("hints").querySelectorAll("button")) b.disabled = hints.has(b.dataset.h);
+  $("worth").textContent = `Worth ${fmt(worth())}`;
+  const m = $("misses");
+  m.innerHTML = "";
+  for (const x of misses) { const s = document.createElement("s"); s.textContent = x; m.append(s); }
   drawPins();
 }
 
-$("slotB").onclick = () => { if (!revealed) { active = "b"; sync(); } };
-$("slotD").onclick = () => { if (!revealed) { active = "d"; sync(); } };
-
-svg.on("click", e => {
-  if (revealed) return;
-  const p = T.invert(d3.pointer(e, svg.node()));
-  const c = proj.invert(p);
-  if (!c || !isFinite(c[0]) || !isFinite(c[1])) return;
-  const back = proj(c);
-  if (!back || Math.hypot(back[0] - p[0], back[1] - p[1]) > 1) return; // outside the globe outline
-  guess[active] = c;
-  if (active === "b" && !guess.d) active = "d";
-  sync();
-});
-
-function pinData() {
-  const f = fig(), out = [];
-  if (revealed) {
-    out.push({ k: "b", type: "real", c: ll(f[4]), tag: f[4][2] });
-    out.push({ k: "d", type: "real", c: ll(f[5]), tag: f[5][2], same: km(ll(f[4]), ll(f[5])) < 30 });
-  }
-  if (guess.b) out.push({ k: "b", type: "guess", c: guess.b });
-  if (guess.d) out.push({ k: "d", type: "guess", c: guess.d });
-  return out;
-}
 function drawPins() {
-  const data = pinData();
-  const sel = gPins.selectAll("g.pin").data(data, d => d.type + d.k).join(enter => {
-    const g = enter.append("g");
-    g.append("circle").attr("r", d => d.type === "real" ? 9 : 8);
+  const f = fig(), showPlaces = hints.has("places") || done;
+  const same = d3.geoDistance(ll(f[4]), ll(f[5])) * 6371 < 30;
+  const data = [
+    { k: "b", c: ll(f[4]), year: "b. " + yr(f[2]), place: f[4][2], dy: same ? -14 : 0 },
+    { k: "d", c: ll(f[5]), year: "d. " + yr(f[3]), place: f[5][2], dy: same ? 14 : 0 },
+  ];
+  const sel = gPins.selectAll("g.pin").data(data, d => d.k).join(enter => {
+    const g = enter.append("g").attr("class", d => `pin ${d.k}`);
+    g.append("circle").attr("r", 9);
     g.append("text").attr("class", "glyph").text(d => d.k === "b" ? "B" : "D");
-    g.append("text").attr("class", "tag").attr("x", 14).attr("y", 0).attr("dominant-baseline", "central");
+    g.append("text").attr("class", "tag").attr("x", 15);
+    g.append("text").attr("class", "place").attr("x", 15).attr("y", 16);
     return g;
   });
-  sel.attr("class", d => `pin ${d.type} ${d.k}`)
-    .attr("transform", d => { const [x, y] = T.apply(proj(d.c)); return `translate(${x},${y + (d.same ? 18 : 0)})`; });
-  sel.select(".tag").text(d => d.tag ? (d.same && d.k === "d" ? "" : d.tag) : "");
-  sel.sort((a, b) => (a.type === "real") - (b.type === "real"));
+  sel.attr("transform", d => { const [x, y] = T.apply(proj(d.c)); return `translate(${x},${y + d.dy})`; });
+  sel.select(".tag").text(d => d.year);
+  sel.select(".place").text(d => showPlaces ? d.place : "");
 }
 
-function reveal() {
-  const f = fig(), rb = ll(f[4]), rd = ll(f[5]);
-  const db = km(guess.b, rb), dd = km(guess.d, rd);
-  const r = { name: f[0], db, dd, pb: score(db), pd: score(dd) };
-  r.pts = r.pb + r.pd;
-  results.push(r);
-  revealed = true;
-  $("map").classList.add("revealed");
-
-  gLines.append("path").datum({ type: "LineString", coordinates: [rb, rd] }).attr("class", "life").attr("d", path);
-  gLines.append("path").datum({ type: "LineString", coordinates: [guess.b, rb] }).attr("class", "miss b").attr("d", path);
-  gLines.append("path").datum({ type: "LineString", coordinates: [guess.d, rd] }).attr("class", "miss d").attr("d", path);
-
-  const res = $("results");
-  res.innerHTML = "";
-  const row = (k, place, d, pts) => {
-    const div = document.createElement("div");
-    div.className = `res ${k}`;
-    div.innerHTML = `<div class="place"><small>${k === "b" ? "Born" : "Died"}</small></div><div class="pts">+${fmt(pts)}</div><div class="km"></div>`;
-    div.querySelector(".place").append(place);
-    div.querySelector(".km").textContent = d < 25 ? `${fmtKm(d)} away. Bullseye.` : `${fmtKm(d)} away`;
-    res.append(div);
-  };
-  row("b", f[4][2], db, r.pb);
-  row("d", f[5][2], dd, r.pd);
-  if (f[6]) { const n = document.createElement("p"); n.className = "note"; n.textContent = "Historians disagree on the exact spot; this uses the most commonly cited location."; res.append(n); }
-  $("slots").hidden = true; res.hidden = false;
-  $("total").textContent = fmt(results.reduce((s, x) => s + x.pts, 0));
-  sync();
-  fitTo([guess.b, guess.d, rb, rd]);
-}
-
-function fitTo(coords) {
-  const pts = coords.map(c => proj(c));
+function fitTo() {
+  const f = fig();
+  const pts = [proj(ll(f[4])), proj(ll(f[5]))];
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
   const box = svg.node().getBoundingClientRect();
-  // Leave room for the floating card on wide screens.
-  const cardW = window.innerWidth > 680 ? 400 / box.width * W : 0;
-  const pad = 60;
-  const k = Math.max(1, Math.min(14, 0.9 / Math.max((x1 - x0 + pad) / (W - cardW), (y1 - y0 + pad) / H)));
+  const cardW = window.innerWidth > 680 ? 420 / box.width * W : 0; // keep pins clear of the floating card
+  const pad = 140;
+  // Stay zoomed out enough to keep some geographic context around the pins.
+  const k = Math.max(1, Math.min(7, 0.9 / Math.max((x1 - x0 + pad) / (W - cardW), (y1 - y0 + pad) / H)));
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-  const t = d3.zoomIdentity.translate(W / 2 + cardW / 2, H / 2).scale(k).translate(-cx, -cy);
-  svg.transition().duration(900).call(zoom.transform, t);
+  svg.transition().duration(900).call(zoom.transform, d3.zoomIdentity.translate((W + cardW) / 2, H / 2).scale(k).translate(-cx, -cy));
 }
 
+function useHint(h) { if (done || hints.has(h)) return; hints.add(h); render(); }
+for (const b of $("hints").querySelectorAll("button")) b.onclick = () => useHint(b.dataset.h);
+
+$("ask").onsubmit = e => {
+  e.preventDefault();
+  if (done) return;
+  const input = $("guess"), g = input.value.trim();
+  if (!g) return;
+  if (isMatch(g, fig())) return finishRound(true);
+  if (!misses.some(m => norm(m) === norm(g))) misses.push(g);
+  input.value = "";
+  input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+  render();
+};
+$("giveup").onclick = () => { if (!done) finishRound(false); };
+
+function finishRound(win) {
+  const f = fig(), pts = win ? worth() : 0;
+  done = true; won = win;
+  results.push({ name: f[0], win, pts, hints: hints.size, misses: misses.length });
+  $("total").textContent = fmt(results.reduce((s, r) => s + r.pts, 0));
+  $("play").hidden = true; $("answer").hidden = false;
+  $("who").textContent = win ? "Identified" : "Revealed";
+  $("verdict").textContent = win ? (misses.length || hints.size ? "Got it" : "First try, no hints") : "Better luck next time";
+  $("verdict").className = "verdict " + (win ? "win" : "lose");
+  $("name").textContent = f[0];
+  $("desc").textContent = f[1];
+  $("approx").hidden = !f[6];
+  $("pts").textContent = `+${fmt(pts)}`;
+  $("nextLabel").textContent = round + 1 < ROUNDS ? "Next figure" : "See final score";
+  render();
+  $("next").focus({ preventScroll: true });
+}
+
+$("next").onclick = () => { if (round + 1 < ROUNDS) { round++; startRound(); } else finish(); };
+
 function finish() {
-  const total = results.reduce((s, r) => s + r.pts, 0);
-  $("finalScore").innerHTML = `${fmt(total)} <small>/ ${fmt(ROUNDS * MAX * 2)}</small>`;
-  const pct = total / (ROUNDS * MAX * 2);
-  $("rank").textContent = pct > .9 ? "Royal Cartographer. You could have written their obituaries." :
-    pct > .75 ? "Master surveyor. Very few pins went astray." :
-    pct > .55 ? "Seasoned navigator. Solid sense of who lived where." :
-    pct > .35 ? "Apprentice mapmaker. The broad strokes are there." :
-    "Lost at sea. Try another five.";
+  const total = results.reduce((s, r) => s + r.pts, 0), max = ROUNDS * BASE;
+  $("finalScore").innerHTML = `${fmt(total)} <small>/ ${fmt(max)}</small>`;
+  const pct = total / max;
+  $("rank").textContent = pct > .9 ? "Royal historian. You barely needed the map." :
+    pct > .7 ? "Sharp eye. Most of them didn't stand a chance." :
+    pct > .5 ? "Well read. A few hints, but you got there." :
+    pct > .25 ? "Getting warmer. The hints are there for a reason." :
+    "History remains a mystery. Try another five.";
   $("ftable").innerHTML = "";
   for (const r of results) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td></td><td class="n">${fmtKm(r.db)}</td><td class="n">${fmtKm(r.dd)}</td><td class="n">${fmt(r.pts)}</td>`;
-    tr.firstChild.textContent = r.name;
+    tr.innerHTML = `<td></td><td></td><td class="n">${fmt(r.pts)}</td>`;
+    tr.children[0].textContent = r.name;
+    tr.children[1].textContent = r.win
+      ? [r.hints ? `${r.hints} hint${r.hints > 1 ? "s" : ""}` : "", r.misses ? `${r.misses} miss${r.misses > 1 ? "es" : ""}` : ""].filter(Boolean).join(", ") || "Clean"
+      : "Gave up";
     $("ftable").append(tr);
   }
   $("final").hidden = false;
   $("again").focus();
 }
-
-$("go").onclick = () => {
-  if (!revealed) { if (guess.b && guess.d) reveal(); return; }
-  if (round + 1 < ROUNDS) { round++; startRound(); } else finish();
-};
 $("again").onclick = newGame;
 document.addEventListener("keydown", e => {
-  if (e.key !== "Enter" || e.target.tagName === "BUTTON") return;
-  if (!$("final").hidden) newGame(); else if (!$("go").disabled) $("go").click();
+  if (e.key !== "Enter" || e.target.tagName === "BUTTON" || e.target.tagName === "INPUT") return;
+  if (!$("final").hidden) newGame(); else if (done) $("next").click();
 });
 
 // Keep progress across live page updates.
 window.claude?.hot?.snapshot?.(() => ({ deck, cursor, round, picks, results }));
 const start = data => {
-  if (data && data.picks && data.picks.length) {
-    ({ deck, cursor, round, picks, results } = data);
-    startRound();
-  } else newGame();
+  if (data && data.picks && data.picks.length) { ({ deck, cursor, round, picks, results } = data); startRound(); }
+  else newGame();
 };
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 </script>
