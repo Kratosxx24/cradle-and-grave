@@ -66,28 +66,31 @@
       ];
       const sel = gPins.selectAll("g.pin").data(data, d => d.k).join(enter => {
         const g = enter.append("g").attr("class", d => `pin ${d.k}`);
-        g.append("circle").attr("class", "halo").attr("r", 9);
-        g.append("circle").attr("class", "dot").attr("r", 9);
-        g.append("text").attr("class", "glyph").text(d => d.k === "b" ? "B" : "D");
+        g.append("circle").attr("class", "halo").attr("r", 6.5);
+        g.append("circle").attr("class", "dot").attr("r", 6.5);
         g.append("text").attr("class", "tag");
         g.append("text").attr("class", "place");
         return g;
       });
       pinXY = data.map(d => { const [x, y] = T.apply(proj(d.c)); return [x, y + d.dy]; });
-      // Labels sit centred above each pin, year nearest the dot and place name over it. When the
-      // pins crowd each other, the lower pin's label hangs below it instead so the two don't collide.
-      const crowded = Math.hypot(pinXY[0][0] - pinXY[1][0], pinXY[0][1] - pinXY[1][1]) < 160;
+      // Labels point away from each other: the upper pin's sits above it, the lower pin's below, year
+      // nearest the dot and place name beyond. The life line runs between the pins, so it never
+      // crosses a label, and the two labels can't collide however close the pins are.
       const lowerIdx = pinXY[0][1] > pinXY[1][1] ? 0 : 1;
       sel.attr("transform", (d, i) => `translate(${pinXY[i][0]},${pinXY[i][1]})`);
-      sel.each(function (d, i) {
-        const s = crowded && i === lowerIdx ? 1 : -1;
-        const g = d3.select(this);
-        g.selectAll(".tag, .place").attr("x", 0).attr("text-anchor", "middle");
-        g.select(".tag").attr("y", s * 23);
-        g.select(".place").attr("y", s * 41);
-      });
       sel.select(".tag").text(d => d.year);
       sel.select(".place").text(d => showPlaces ? d.place : "");
+      sel.each(function (d, i) {
+        const s = i === lowerIdx ? 1 : -1, px = pinXY[i][0];
+        const g = d3.select(this);
+        g.select(".tag").attr("y", s * 20);
+        g.select(".place").attr("y", s * 38);
+        // Centred on the pin, but slid sideways if that would run off the edge of the map.
+        g.selectAll(".tag, .place").attr("text-anchor", "middle").each(function () {
+          const half = this.getComputedTextLength() / 2, lo = 6 + half - px, hi = w - 6 - half - px;
+          d3.select(this).attr("x", lo > hi ? 0 : Math.max(lo, Math.min(0, hi)));
+        });
+      });
     }
 
     // Country names appear as you zoom in: a country is labelled once it's big enough on
@@ -155,8 +158,13 @@
       const availW = w - cardW - Math.min(180, w * 0.25), availH = h - Math.min(180, h * 0.4);
       const k = Math.max(k0, Math.min(MAX_FIT_ZOOM * k0, availW / spanX, availH / spanY));
 
-      // Centre the pins in the space right of the card.
-      const tx = cardW + (w - cardW) / 2, ty = h / 2;
+      // Centre the pins in the space right of the card. A pair too wide for that space (Bruce Lee:
+      // San Francisco to Hong Kong) would push one pin off the right edge, so pull both back on.
+      const off = pts.map(p => k * (p[0] - cx)), m = 28; // each pin's x relative to the centre
+      let tx = cardW + (w - cardW) / 2;
+      tx = Math.min(tx, w - m - Math.max(...off));
+      tx = Math.max(tx, m - Math.min(...off));
+      const ty = h / 2;
       const target = d3.zoomIdentity.translate(tx, ty).scale(k).translate(-cx, -cy);
       // Hidden tabs don't run animation frames, so a transition would never finish; jump instead.
       if (duration === 0 || document.hidden) svg.interrupt().call(zoom.transform, target);

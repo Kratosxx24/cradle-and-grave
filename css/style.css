@@ -77,7 +77,7 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 .pin.b .dot { fill: var(--born); } .pin.d .dot { fill: var(--died); }
 .pin .halo { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: halo 1.6s ease-out 2; opacity: 0; }
 .pin.b .halo { stroke: var(--born); } .pin.d .halo { stroke: var(--died); }
-@keyframes halo { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(3.2); opacity: 0; } }
+@keyframes halo { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(4); opacity: 0; } }
 .countries text {
   font-family: var(--body); font-weight: 500; text-transform: uppercase; letter-spacing: .12em; text-anchor: middle;
   dominant-baseline: central; fill: var(--muted); opacity: .75; pointer-events: none;
@@ -86,10 +86,9 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 .scalebar .bg { fill: var(--panel); stroke: var(--line); }
 .scalebar path { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .scalebar text { font-family: var(--body); font-size: 10px; font-weight: 500; letter-spacing: .04em; fill: var(--ink); text-anchor: middle; font-variant-numeric: tabular-nums; }
-.pin .glyph { font-family: var(--body); font-size: 9.5px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--panel); }
-.pin .tag { font-family: var(--serif); font-size: 15px; font-weight: 600; font-variant-numeric: lining-nums; dominant-baseline: central; paint-order: stroke; stroke: var(--land-hi); stroke-width: 4px; stroke-linejoin: round; }
+.pin .tag { font-family: var(--serif); font-size: 15px; font-weight: 600; font-variant-numeric: lining-nums; dominant-baseline: central; }
 .pin.b .tag { fill: var(--born); } .pin.d .tag { fill: var(--died); }
-.pin .place { font-family: var(--serif); font-style: italic; font-size: 14px; font-weight: 500; fill: var(--ink); dominant-baseline: central; paint-order: stroke; stroke: var(--land-hi); stroke-width: 4px; stroke-linejoin: round; }
+.pin .place { font-family: var(--serif); font-style: italic; font-size: 14px; font-weight: 500; fill: var(--ink); dominant-baseline: central; }
 
 .zoomctl { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); }
 .zoomctl button { width: 34px; height: 34px; border: 0; background: transparent; color: var(--ink); font: 500 18px var(--body); cursor: pointer; }
