@@ -1,7 +1,7 @@
 // Game flow: rounds, hints, guesses, scoring and the final tally.
 (function (CG) {
   const ROUNDS = 5, BASE = 1000, HINT_COST = 250, MISS_COST = 100, FLOOR = 100;
-  const SITE = "kratosxx24.github.io/lifelines";
+  const SITE = "lifelines.codexcanon.workers.dev";
   const $ = id => document.getElementById(id);
 
   const yr = y => y < 0 ? `${-y} BC` : (y < 100 ? `AD ${y}` : `${y}`);
@@ -14,6 +14,24 @@
     get(k) { try { return JSON.parse(localStorage.getItem("cg:" + k)); } catch { return null; } },
     set(k, v) { try { localStorage.setItem("cg:" + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
   };
+
+  // Light/dark: follows the system until you pick one, then remembers your pick.
+  const darkQuery = matchMedia("(prefers-color-scheme: dark)");
+  const isDark = () => (document.documentElement.dataset.theme || (darkQuery.matches ? "dark" : "light")) === "dark";
+  function paintTheme() {
+    const dark = isDark();
+    $("theme").setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    // The browser chrome colour follows the page, not just the system setting.
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute("content", dark ? "#0b1419" : "#e9eef0"));
+  }
+  $("theme").onclick = () => {
+    const next = isDark() ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    store.set("theme", next);
+    paintTheme();
+  };
+  darkQuery.addEventListener("change", paintTheme);
+  paintTheme();
 
   const map = CG.createMap($("map"), { yr });
   $("zin").onclick = () => map.zoomBy(2);

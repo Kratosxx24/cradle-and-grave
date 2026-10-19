@@ -2,7 +2,7 @@
 
 A guess-who game on a map. The map shows where a famous historical figure was born and where they died, with the year of each. You type in who it is, and the answer comes with their portrait.
 
-**Play online:** https://lifelines.codexcanon.workers.dev (Cloudflare) or https://kratosxx24.github.io/lifelines/ (GitHub Pages)
+**Play online:** https://lifelines.codexcanon.workers.dev
 
 ## How it plays
 

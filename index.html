@@ -15,7 +15,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
+<script>
+  // Apply a saved theme before first paint, so picking dark doesn't flash light on every load.
+  try { var t = JSON.parse(localStorage.getItem("cg:theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
 <body>
 <div class="app">
@@ -27,6 +31,10 @@
     <div class="tally">
       <div><span>Figure</span><b id="roundNo">1 / 5</b></div>
       <div><span>Score</span><b id="total">0</b></div>
+      <button class="theme" id="theme" type="button" aria-label="Switch to dark mode">
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+      </button>
     </div>
   </header>
 
@@ -120,7 +128,7 @@
 <script src="data/portraits.js?v=8"></script>
 <script src="js/figures.js?v=8"></script>
 <script src="js/match.js?v=8"></script>
-<script src="js/map.js?v=8"></script>
-<script src="js/game.js?v=8"></script>
+<script src="js/map.js?v=9"></script>
+<script src="js/game.js?v=9"></script>
 </body>
 </html>

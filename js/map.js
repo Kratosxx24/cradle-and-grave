@@ -61,8 +61,8 @@
       if (!fig) { pinXY = []; return; }
       const same = d3.geoDistance(ll(fig[4]), ll(fig[5])) * 6371 < 30;
       const data = [
-        { k: "b", c: ll(fig[4]), year: "b. " + yr(fig[2]), place: fig[4][2], dy: same ? -14 : 0 },
-        { k: "d", c: ll(fig[5]), year: "d. " + yr(fig[3]), place: fig[5][2], dy: same ? 14 : 0 },
+        { k: "b", c: ll(fig[4]), year: "Born " + yr(fig[2]), place: fig[4][2], dy: same ? -14 : 0 },
+        { k: "d", c: ll(fig[5]), year: "Died " + yr(fig[3]), place: fig[5][2], dy: same ? 14 : 0 },
       ];
       const sel = gPins.selectAll("g.pin").data(data, d => d.k).join(enter => {
         const g = enter.append("g").attr("class", d => `pin ${d.k}`);
@@ -70,17 +70,21 @@
         g.append("circle").attr("class", "dot").attr("r", 9);
         g.append("text").attr("class", "glyph").text(d => d.k === "b" ? "B" : "D");
         g.append("text").attr("class", "tag");
-        g.append("text").attr("class", "place").attr("y", 16);
+        g.append("text").attr("class", "place");
         return g;
       });
       pinXY = data.map(d => { const [x, y] = T.apply(proj(d.c)); return [x, y + d.dy]; });
-      // When the pins crowd each other, hang the left pin's label off its left side so the two don't collide.
+      // Labels sit centred above each pin, year nearest the dot and place name over it. When the
+      // pins crowd each other, the lower pin's label hangs below it instead so the two don't collide.
       const crowded = Math.hypot(pinXY[0][0] - pinXY[1][0], pinXY[0][1] - pinXY[1][1]) < 160;
-      const leftIdx = pinXY[0][0] <= pinXY[1][0] ? 0 : 1;
-      const flip = (d, i) => crowded && i === leftIdx;
+      const lowerIdx = pinXY[0][1] > pinXY[1][1] ? 0 : 1;
       sel.attr("transform", (d, i) => `translate(${pinXY[i][0]},${pinXY[i][1]})`);
       sel.each(function (d, i) {
-        d3.select(this).selectAll(".tag, .place").attr("x", flip(d, i) ? -15 : 15).attr("text-anchor", flip(d, i) ? "end" : "start");
+        const s = crowded && i === lowerIdx ? 1 : -1;
+        const g = d3.select(this);
+        g.selectAll(".tag, .place").attr("x", 0).attr("text-anchor", "middle");
+        g.select(".tag").attr("y", s * 21);
+        g.select(".place").attr("y", s * 37);
       });
       sel.select(".tag").text(d => d.year);
       sel.select(".place").text(d => showPlaces ? d.place : "");
@@ -89,7 +93,7 @@
     // Country names appear as you zoom in: a country is labelled once it's big enough on
     // screen to hold its name, biggest first, skipping any that would collide.
     function drawLabels() {
-      const placed = pinXY.map(([x, y]) => [x - 20, y - 20, x + 170, y + 26]); // keep clear of pins and their labels
+      const placed = pinXY.map(([x, y]) => [x - 80, y - 46, x + 80, y + 46]); // keep clear of pins and their labels, above or below
       const out = [];
       const size = T.k < 3 * k0 ? 9 : 10.5;
       for (const l of labels) {
@@ -146,13 +150,13 @@
       const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
       const spanX = Math.max(x1 - x0, minSpan), spanY = Math.max(y1 - y0, minSpan * 0.6);
 
-      // Room to work with: the visible map minus the card, with margins for pin labels.
+      // Room to work with: the visible map minus the card, with margins for the labels above and below the pins.
       const cardW = cardOffset();
-      const availW = w - cardW - Math.min(240, w * 0.3), availH = h - Math.min(110, h * 0.25);
+      const availW = w - cardW - Math.min(180, w * 0.25), availH = h - Math.min(150, h * 0.3);
       const k = Math.max(k0, Math.min(MAX_FIT_ZOOM * k0, availW / spanX, availH / spanY));
 
-      // Centre the pins in the space right of the card, nudged left so labels have room on the right.
-      const tx = cardW + (w - cardW) / 2 - Math.min(50, w * 0.08), ty = h / 2;
+      // Centre the pins in the space right of the card.
+      const tx = cardW + (w - cardW) / 2, ty = h / 2;
       const target = d3.zoomIdentity.translate(tx, ty).scale(k).translate(-cx, -cy);
       // Hidden tabs don't run animation frames, so a transition would never finish; jump instead.
       if (duration === 0 || document.hidden) svg.interrupt().call(zoom.transform, target);
