@@ -83,8 +83,8 @@
         const s = crowded && i === lowerIdx ? 1 : -1;
         const g = d3.select(this);
         g.selectAll(".tag, .place").attr("x", 0).attr("text-anchor", "middle");
-        g.select(".tag").attr("y", s * 21);
-        g.select(".place").attr("y", s * 37);
+        g.select(".tag").attr("y", s * 23);
+        g.select(".place").attr("y", s * 41);
       });
       sel.select(".tag").text(d => d.year);
       sel.select(".place").text(d => showPlaces ? d.place : "");
@@ -93,7 +93,7 @@
     // Country names appear as you zoom in: a country is labelled once it's big enough on
     // screen to hold its name, biggest first, skipping any that would collide.
     function drawLabels() {
-      const placed = pinXY.map(([x, y]) => [x - 80, y - 46, x + 80, y + 46]); // keep clear of pins and their labels, above or below
+      const placed = pinXY.map(([x, y]) => [x - 85, y - 50, x + 85, y + 50]); // keep clear of pins and their labels, above or below
       const out = [];
       const size = T.k < 3 * k0 ? 9 : 10.5;
       for (const l of labels) {
@@ -152,7 +152,7 @@
 
       // Room to work with: the visible map minus the card, with margins for the labels above and below the pins.
       const cardW = cardOffset();
-      const availW = w - cardW - Math.min(180, w * 0.25), availH = h - Math.min(150, h * 0.3);
+      const availW = w - cardW - Math.min(180, w * 0.25), availH = h - Math.min(180, h * 0.4);
       const k = Math.max(k0, Math.min(MAX_FIT_ZOOM * k0, availW / spanX, availH / spanY));
 
       // Centre the pins in the space right of the card.
