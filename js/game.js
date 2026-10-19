@@ -73,6 +73,7 @@
     $("guess").value = "";
     map.show(f);
     render();
+    freshen(document.querySelector(".clues"), $("span"), $("play"));
     // Fetch the portrait now so it's ready the moment the answer is revealed.
     const portrait = CG.PORTRAITS[f[0]];
     if (portrait && portrait.img) new Image().src = portrait.img;
@@ -103,6 +104,11 @@
 
   for (const b of $("hints").querySelectorAll("button")) {
     b.onclick = () => { if (!done && !hints.has(b.dataset.h)) { hints.add(b.dataset.h); render(); $("guess").focus({ preventScroll: true }); } };
+  }
+
+  // Replay the fade-up on a block of the card whose content just changed.
+  function freshen(...els) {
+    for (const el of els) { el.classList.remove("fresh"); void el.offsetWidth; el.classList.add("fresh"); }
   }
 
   function shake() {
@@ -161,6 +167,7 @@
     $("pts").textContent = `+${fmt(pts)}`;
     $("nextLabel").textContent = round + 1 < ROUNDS ? "Next figure" : "See final score";
     render();
+    freshen($("answer"));
     $("next").focus({ preventScroll: true });
     // On phones the card sits under the map; bring the answer into view once the keyboard drops.
     if (!window.matchMedia("(min-width: 681px)").matches) {

@@ -75,9 +75,17 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 .pin text { pointer-events: none; }
 .pin .dot { stroke: var(--panel); stroke-width: 2.5; }
 .pin.b .dot { fill: var(--born); } .pin.d .dot { fill: var(--died); }
-.pin .halo { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: halo 1.6s ease-out 2; opacity: 0; }
+/* Pins wait unseen through the flight, then land: the dot springs up, the label fades in, one ripple. */
+.pin.live { opacity: 0; transition: opacity .3s ease-out; }
+.pin.live.landed { opacity: 1; }
+.pin.landed .dot { transform-box: fill-box; transform-origin: center; animation: pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+@keyframes pop { from { transform: scale(0); } }
+.pin .halo { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; opacity: 0; }
+.pin.landed .halo { animation: halo 1.3s cubic-bezier(.2, .7, .3, 1) .05s 1; }
 .pin.b .halo { stroke: var(--born); } .pin.d .halo { stroke: var(--died); }
-@keyframes halo { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(4); opacity: 0; } }
+@keyframes halo { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(4.5); opacity: 0; } }
+.countries { transition: opacity .45s ease-out; }
+.countries.hush { opacity: 0; transition-duration: .2s; }
 .countries text {
   font-family: var(--body); font-weight: 500; text-transform: uppercase; letter-spacing: .12em; text-anchor: middle;
   dominant-baseline: central; fill: var(--muted); opacity: .75; pointer-events: none;
@@ -194,6 +202,14 @@ td.n { font-family: var(--serif); font-size: 16px; font-weight: 600; font-varian
   .zoomctl button { width: 40px; height: 40px; }
   body { padding-block: 10px max(12px, env(safe-area-inset-bottom)); }
 }
+.fresh { animation: fresh .4s cubic-bezier(.2, .7, .3, 1) both; }
+.fresh + .fresh { animation-delay: .05s; }
+@keyframes fresh { from { opacity: 0; transform: translateY(5px); } }
+.final { animation: veil .3s ease-out both; }
+.final .sheet { animation: rise .5s cubic-bezier(.2, .8, .2, 1) .05s both; }
+@keyframes veil { from { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 .best { font-size: 13px; color: var(--muted); margin-top: 2px; }

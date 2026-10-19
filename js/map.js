@@ -35,7 +35,10 @@
       return { name: shortName(c.properties.name), at: path.centroid(main), area: path.area(main), bounds: path.bounds(c), feature: c };
     }).filter(l => isFinite(l.at[0])).sort((a, b) => b.area - a.area);
 
-    let T = d3.zoomIdentity, fig = null, showPlaces = false, pinXY = [];
+    let T = d3.zoomIdentity, fig = null, showPlaces = false, pinXY = [], flight = 0, lifeEl = null;
+    // Skip choreography when it can't play (hidden tabs run no animation frames) or isn't wanted.
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+    const instant = () => document.hidden || reduced.matches;
     const zoom = d3.zoom().translateExtent([[0, 0], [W, H]])
       .on("zoom", e => { T = e.transform; gMap.attr("transform", T); drawPins(); drawLabels(); drawScale(); });
     svg.call(zoom);
@@ -64,8 +67,8 @@
         { k: "b", c: ll(fig[4]), year: "Born " + yr(fig[2]), place: fig[4][2], dy: same ? -14 : 0 },
         { k: "d", c: ll(fig[5]), year: "Died " + yr(fig[3]), place: fig[5][2], dy: same ? 14 : 0 },
       ];
-      const sel = gPins.selectAll("g.pin").data(data, d => d.k).join(enter => {
-        const g = enter.append("g").attr("class", d => `pin ${d.k}`);
+      const sel = gPins.selectAll("g.live").data(data, d => d.k).join(enter => {
+        const g = enter.append("g").attr("class", d => `pin live ${d.k}`);
         g.append("circle").attr("class", "halo").attr("r", 6.5);
         g.append("circle").attr("class", "dot").attr("r", 6.5);
         g.append("text").attr("class", "tag");
@@ -73,6 +76,8 @@
         return g;
       });
       pinXY = data.map(d => { const [x, y] = T.apply(proj(d.c)); return [x, y + d.dy]; });
+      // The outgoing figure's pins stay pinned to their places, so they ride away with the map as they fade.
+      gPins.selectAll("g.leaving").attr("transform", d => { const [x, y] = T.apply(proj(d.c)); return `translate(${x},${y + d.dy})`; });
       // Labels point away from each other: the upper pin's sits above it, the lower pin's below, year
       // nearest the dot and place name beyond. The life line runs between the pins, so it never
       // crosses a label, and the two labels can't collide however close the pins are.
@@ -140,8 +145,16 @@
     // Width in px the floating card covers on the left (0 on phones, where it sits below the map).
     const cardOffset = () => window.innerWidth > 680 ? 420 : 0;
 
+    // How long a flight to `target` should take. d3's smooth-zoom path knows how far the camera really
+    // travels (out, across, back in), so long hops get time to breathe and short ones stay brisk.
+    function flightMs(target) {
+      const view = t => [(w / 2 - t.x) / t.k, (h / 2 - t.y) / t.k, w / t.k];
+      return Math.max(700, Math.min(2000, d3.interpolateZoom(view(T), view(target)).duration * 0.9));
+    }
+
     // Frame both pins. Close pairs get a tight regional view; far-apart pairs pull back.
-    function fit(duration = 1200) {
+    // With no duration, the flight is timed to its length. `arrive` runs when the camera settles.
+    function fit(duration, arrive) {
       if (!fig) return;
       const pts = [proj(ll(fig[4])), proj(ll(fig[5]))];
       let [x0, x1] = d3.extent(pts, p => p[0]), [y0, y1] = d3.extent(pts, p => p[1]);
@@ -166,19 +179,54 @@
       tx = Math.max(tx, m - Math.min(...off));
       const ty = h / 2;
       const target = d3.zoomIdentity.translate(tx, ty).scale(k).translate(-cx, -cy);
+      if (duration === undefined) duration = flightMs(target);
       // Hidden tabs don't run animation frames, so a transition would never finish; jump instead.
-      if (duration === 0 || document.hidden) svg.interrupt().call(zoom.transform, target);
-      else svg.transition().duration(duration).call(zoom.transform, target);
+      if (duration === 0 || instant()) { svg.interrupt().call(zoom.transform, target); if (arrive) arrive(); return; }
+      // A drag mid-flight interrupts it; land the pins anyway rather than leave them unshown. d3 runs on
+      // animation frames, which a page can stop getting while still "visible" (an occluded window), so a
+      // plain timer backs it up: the figure always appears, at worst without the flight.
+      let arrived = false;
+      const go = () => { if (!arrived) { arrived = true; if (arrive) arrive(); } };
+      svg.transition("fly").duration(duration).ease(d3.easeCubicInOut).call(zoom.transform, target).on("end interrupt", go);
+      setTimeout(go, duration + 500);
+    }
+
+    // Once the camera arrives: the birth pin lands, the life line draws itself along the great
+    // circle to the deathplace, and the death pin lands as the line reaches it.
+    function land(id) {
+      if (id !== flight) return;
+      gLabels.classed("hush", false);
+      const pins = gPins.selectAll("g.live"), a = ll(fig[4]), b = ll(fig[5]);
+      const full = { type: "LineString", coordinates: [a, b] };
+      if (instant()) { pins.classed("landed", true); lifeEl.attr("d", path(full)); return; }
+      pins.filter(d => d.k === "b").classed("landed", true);
+      const km = d3.geoDistance(a, b) * 6371;
+      const lineMs = km < 30 ? 0 : Math.round(Math.max(450, Math.min(950, 400 + km / 12)));
+      const gi = d3.geoInterpolate(a, b);
+      lifeEl.transition("draw").delay(200).duration(lineMs).ease(d3.easeCubicInOut)
+        .attrTween("d", () => t => path({ type: "LineString", coordinates: [a, gi(t)] }) || "");
+      setTimeout(() => { if (id === flight) pins.filter(d => d.k === "d").classed("landed", true); }, 200 + Math.max(120, lineMs - 80));
+      // Same frame-starvation guard as the flight: end on the finished line however the draw went.
+      setTimeout(() => { if (id === flight) lifeEl.interrupt("draw").attr("d", path(full)); }, 200 + lineMs + 600);
     }
 
     svg.call(zoom.transform, d3.zoomIdentity.scale(k0));
     return {
       show(next) {
         fig = next; showPlaces = false;
-        gLines.selectAll("*").remove();
-        gLines.append("path").datum({ type: "LineString", coordinates: [ll(fig[4]), ll(fig[5])] }).attr("class", "life").attr("d", path);
-        gPins.selectAll("g.pin").remove(); // fresh pins replay their drop-in animation
-        drawPins(); drawLabels(); fit();
+        const id = ++flight, fade = instant() ? 0 : 240;
+        // The last figure fades out where it is while the camera pulls away from it.
+        const gone = () => { gPins.selectAll("g.leaving").remove(); gLines.selectAll("path.leaving").remove(); };
+        gone();
+        gPins.selectAll("g.live").classed("live", false).classed("leaving", true)
+          .transition().duration(fade).style("opacity", 0).remove();
+        gLines.selectAll("path.life").interrupt("draw").classed("leaving", true)
+          .transition().duration(fade).style("opacity", 0).remove();
+        setTimeout(gone, fade + 150); // in case the fade never gets the frames to finish
+        lifeEl = gLines.append("path").attr("class", "life").attr("d", "");
+        // Country names would flicker in and out all the way across; let the flight run without them.
+        gLabels.classed("hush", !instant());
+        drawPins(); drawLabels(); fit(undefined, () => land(id));
       },
       setPlaces(on) { showPlaces = on; drawPins(); drawLabels(); },
       fit: () => fit(700),
