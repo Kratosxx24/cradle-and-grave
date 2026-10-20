@@ -1,7 +1,7 @@
 // Game flow: rounds, hints, guesses, scoring and the final tally.
 (function (CG) {
   const ROUNDS = 5, BASE = 1000, HINT_COST = 250, MISS_COST = 100, FLOOR = 100;
-  const SITE = "lifelines.codexcanon.workers.dev";
+  const SITE = "https://lifelines.codexcanon.workers.dev";
   const $ = id => document.getElementById(id);
 
   const yr = y => y < 0 ? `${-y} BC` : (y < 100 ? `AD ${y}` : `${y}`);
@@ -50,11 +50,32 @@
   const total = () => results.reduce((s, r) => s + r.pts, 0);
   const worth = () => Math.max(FLOOR, BASE - HINT_COST * hints.size - MISS_COST * misses.length);
 
+  // The header score counts up to a new total rather than jumping. A plain timer drives it, so it
+  // still lands on the right number if the page isn't getting animation frames.
+  let shown = 0, counting = 0;
+  function setTotal(n, animate) {
+    clearInterval(counting);
+    const el = $("total"), from = shown, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    shown = n;
+    if (!animate || reduce || n === from) { el.textContent = fmt(n); return; }
+    const t0 = performance.now(), ms = 650;
+    counting = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / ms), eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(from + (n - from) * eased);
+      if (p === 1) clearInterval(counting);
+    }, 16);
+  }
+
+  function showFinal(open) {
+    $("final").hidden = !open;
+    for (const el of [$("card"), document.querySelector(".zoomctl"), $("map")]) el.inert = open;
+  }
+
   function newGame() {
     if (cursor + ROUNDS > deck.length) { deck = shuffle(CG.POOL.map((_, i) => i)); cursor = 0; }
     picks = deck.slice(cursor, cursor + ROUNDS); cursor += ROUNDS;
     round = 0; results = [];
-    $("final").hidden = true;
+    showFinal(false);
     startRound();
   }
 
@@ -62,7 +83,7 @@
     const f = fig();
     hints = new Set(); misses = []; done = false; suggestedFor = null;
     $("roundNo").textContent = `${round + 1} / ${ROUNDS}`;
-    $("total").textContent = fmt(total());
+    setTotal(total(), false);
     $("who").textContent = "Who is this?";
     $("yB").textContent = yr(f[2]);
     $("yD").textContent = yr(f[3]);
@@ -148,14 +169,17 @@
     }
     judge(text);
   };
-  $("guess").addEventListener("input", () => { if (suggestedFor && CG.norm($("guess").value) !== suggestedFor) hideSuggestion(); });
+  $("guess").addEventListener("input", () => {
+    $("guess").classList.remove("shake");
+    if (suggestedFor && CG.norm($("guess").value) !== suggestedFor) hideSuggestion();
+  });
   $("giveup").onclick = () => { if (!done) finishRound(false); };
 
   function finishRound(win) {
     const f = fig(), pts = win ? worth() : 0;
     done = true; hideSuggestion();
     results.push({ name: f[0], win, pts, hints: hints.size, misses: misses.length });
-    $("total").textContent = fmt(total());
+    setTotal(total(), true);
     $("play").hidden = true; $("answer").hidden = false;
     $("who").textContent = win ? "Identified" : "Revealed";
     $("verdict").textContent = win ? (misses.length || hints.size ? "Got it" : "First try, no hints") : "Better luck next time";
@@ -178,10 +202,13 @@
   function showPortrait(f) {
     const p = CG.PORTRAITS[f[0]] || {}, img = $("portraitImg"), frame = $("portrait");
     frame.hidden = !p.img;
+    img.classList.remove("in");
     if (p.img) {
+      img.onload = () => img.classList.add("in");
       img.onerror = () => { frame.hidden = true; };
-      img.src = p.img;
       img.alt = `Portrait of ${f[0]}`;
+      if (img.src === p.img && img.complete && img.naturalWidth) img.classList.add("in");
+      else img.src = p.img;
     }
     $("wiki").hidden = !p.page;
     if (p.page) $("wiki").href = p.page;
@@ -193,10 +220,10 @@
 
   function finish() {
     const t = total(), max = ROUNDS * BASE, pct = t / max;
-    const best = Math.max(t, store.get("best") || 0);
+    const prev = store.get("best") || 0, best = Math.max(t, prev);
     store.set("best", best);
     $("finalScore").innerHTML = `${fmt(t)} <small>/ ${fmt(max)}</small>`;
-    $("best").textContent = t >= best && t > 0 ? "New personal best" : `Personal best ${fmt(best)}`;
+    $("best").textContent = t > prev ? "New personal best" : `Personal best ${fmt(best)}`;
     $("rank").textContent =
       pct > .9 ? "Royal historian. You barely needed the map." :
       pct > .7 ? "Sharp eye. Most of them didn't stand a chance." :
@@ -221,7 +248,7 @@
     }));
     $("shareText").value = `Lifelines ${fmt(t)} / ${fmt(max)}\n${results.map(square).join("")}\n${SITE}`;
     $("shareMsg").textContent = "";
-    $("final").hidden = false;
+    showFinal(true);
     $("again").focus();
   }
 
@@ -243,7 +270,7 @@
     play(name) {
       const i = CG.POOL.findIndex(f => f[0] === name);
       if (i < 0) return `No figure named ${name}`;
-      $("final").hidden = true; picks[round] = i; startRound();
+      showFinal(false); picks[round] = i; startRound();
     },
   };
 

@@ -187,7 +187,7 @@
       // plain timer backs it up: the figure always appears, at worst without the flight.
       let arrived = false;
       const go = () => { if (!arrived) { arrived = true; if (arrive) arrive(); } };
-      svg.transition("fly").duration(duration).ease(d3.easeCubicInOut).call(zoom.transform, target).on("end interrupt", go);
+      svg.transition().duration(duration).ease(d3.easeCubicInOut).call(zoom.transform, target).on("end interrupt", go);
       setTimeout(go, duration + 500);
     }
 

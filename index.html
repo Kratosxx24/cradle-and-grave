@@ -8,6 +8,12 @@
 <meta name="theme-color" content="#0b1419" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-title" content="Lifelines">
 <meta name="description" content="A map traces where a famous figure's life began and ended. Name them.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lifelines">
+<meta property="og:description" content="A map traces where a famous figure's life began and ended. Name them.">
+<meta property="og:url" content="https://lifelines.codexcanon.workers.dev/">
+<meta property="og:image" content="https://lifelines.codexcanon.workers.dev/icons/icon-512.png">
+<meta name="twitter:card" content="summary">
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -15,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Work+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/style.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
 <script>
   // Apply a saved theme before first paint, so picking dark doesn't flash light on every load.
   try { var t = JSON.parse(localStorage.getItem("cg:theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
@@ -66,11 +72,11 @@
           <button class="go" type="submit">Guess</button>
         </form>
         <div class="suggest" id="suggest" hidden role="status">
-          Did you mean <button type="button" id="suggestName"></button>?
+          <div>Did you mean <button type="button" id="suggestName"></button>?</div>
           <span>Or press Enter to guess it as typed.</span>
         </div>
         <div class="row">
-          <span class="worth" id="worth">Worth 1,000</span>
+          <span class="worth" id="worth" aria-live="polite">Worth 1,000</span>
           <button class="link" id="giveup" type="button">Give up and reveal</button>
         </div>
         <div class="misses" id="misses"></div>
@@ -80,7 +86,7 @@
         <div class="reveal">
           <figure class="portrait" id="portrait" hidden><img id="portraitImg" alt=""></figure>
           <div class="reveal-text">
-            <div class="verdict" id="verdict"></div>
+            <div class="verdict" id="verdict" aria-live="polite"></div>
             <h2 id="name"></h2>
             <div class="desc" id="desc"></div>
             <a class="wiki" id="wiki" target="_blank" rel="noopener">Read more on Wikipedia</a>
@@ -127,8 +133,8 @@
 <script src="data/atlas.js?v=8"></script>
 <script src="data/portraits.js?v=8"></script>
 <script src="js/figures.js?v=8"></script>
-<script src="js/match.js?v=8"></script>
-<script src="js/map.js?v=14"></script>
-<script src="js/game.js?v=10"></script>
+<script src="js/match.js?v=9"></script>
+<script src="js/map.js?v=15"></script>
+<script src="js/game.js?v=11"></script>
 </body>
 </html>

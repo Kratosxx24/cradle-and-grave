@@ -86,15 +86,39 @@
     return null;
   }
 
+  // The figures a guess names outright, with no typo allowance. Indexed once by the two loosest
+  // exact keys (word order, sound), then confirmed with closeness so regnal numbers still apply.
+  let exactIndex = null;
+  function exactOwners(g) {
+    if (!exactIndex) {
+      exactIndex = new Map();
+      for (const fig of CG.POOL) for (const f of forms(fig)) {
+        const ft = stripTitles(f);
+        for (const k of [sortTokens(ft), "~" + skeleton(ft)]) {
+          if (!exactIndex.has(k)) exactIndex.set(k, new Set());
+          exactIndex.get(k).add(fig);
+        }
+      }
+    }
+    const gt = stripTitles(g), found = new Set();
+    for (const k of [sortTokens(gt), "~" + skeleton(gt)]) for (const fig of exactIndex.get(k) || []) found.add(fig);
+    return [...found].filter(fig => forms(fig).some(f => closeness(g, f) === 0));
+  }
+
   function accepts(guess, fig) {
     const g = norm(guess);
     if (!g) return false;
     const gn = numeral(g), fn = numeral(norm(fig[0]));
     if (gn !== null && fn !== null && gn !== fn) return false;
-    return forms(fig).some(f => {
+    let typo = false;
+    for (const f of forms(fig)) {
       const d = closeness(g, f);
-      return d === 0 || d <= slack(stripTitles(f).length);
-    });
+      if (d === 0) return true;
+      if (d <= slack(stripTitles(f).length)) typo = true;
+    }
+    // The typo allowance is for misspellings, so it never covers a guess that is exactly someone
+    // else in the pool: "Lenin" isn't a slip for Lennon, and "Marx" isn't one for Parks.
+    return typo && !exactOwners(g).some(o => o !== fig);
   }
 
   // The figure whose name is nearest a near-miss guess, or null if nothing is

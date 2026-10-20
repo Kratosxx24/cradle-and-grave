@@ -68,6 +68,24 @@ test("no figure's surname rule accidentally accepts a different figure's full na
   }
 });
 
+test("a guess that exactly names someone else is never a typo for another figure", () => {
+  assert.ok(!CG.accepts("Marx", fig("Rosa Parks")));
+  assert.ok(!CG.accepts("Lenin", fig("John Lennon")));
+  assert.ok(!CG.accepts("Lennon", fig("Vladimir Lenin")));
+  assert.ok(!CG.accepts("Lewis", fig("Elvis Presley")));
+  assert.ok(!CG.accepts("Elvis", fig("C. S. Lewis")));
+  assert.ok(!CG.accepts("Peter I", fig("Saint Peter")));
+  // A surname two figures genuinely share still counts for either.
+  assert.ok(CG.accepts("Roosevelt", fig("Theodore Roosevelt")));
+  assert.ok(CG.accepts("Roosevelt", fig("Franklin D. Roosevelt")));
+  // And real typos of the answer still land.
+  assert.ok(CG.accepts("Lenon", fig("John Lennon")));
+  assert.ok(CG.accepts("Prks", fig("Rosa Parks")));
+  for (const a of CG.POOL) for (const form of CG.forms(a)) for (const b of CG.POOL) {
+    if (a !== b && CG.accepts(form, b) && !CG.forms(b).includes(form)) assert.fail(`"${form}" (${a[0]}) is accepted as ${b[0]}`);
+  }
+});
+
 test("no suggestion when the guess already names someone in the pool", () => {
   for (const g of ["Columbus", "einstein", "Napoleon"]) assert.strictEqual(CG.suggest(g, CG.POOL), null, g);
 });
